@@ -13,8 +13,10 @@ or the physical gameplay acceptance gate.
   provenance and hypothesis table in [the source investigation](webgl-source.md).
 - The new isolated matrix passes desktop positive and fault-injection tests.
   The first owner-selected handheld opening returned **18/18 null contexts on
-  each HTTP origin**, including all trusted taps. HTTPS was recorded unreachable.
-  The second fresh applet opening and HTTPS failure details remain pending; see
+  each HTTP origin**, including all trusted taps. A repeated captive run after
+  Wi-Fi reconnect also returned 18/18 null. HTTPS navigation returned to the
+  local portal; a direct canonical URL is available as the next control. The
+  second LAN report and usable HTTPS-origin measurement remain pending; see
   [validation and physical evidence](webgl-validation.md#physical-origin-comparison).
   Desktop SwiftShader drawing is harness validation, not evidence of Switch GPU
   access or gameplay speed.
@@ -51,7 +53,8 @@ Deployment origins are metadata and do not change that source revision.
 ## Controlled physical procedure
 
 1. Record System Settings → System version, handheld/docked mode and the entry
-   route. Close and reopen the stock Wi-Fi login applet through Connection Test.
+   route. Close and reopen the stock Wi-Fi login applet. On the measured console,
+   Connection Test alone did not reopen it; reconnecting Wi-Fi did.
    Select **First opening**. Do not launch Diablo before these checks.
 2. Open **WebGL research**, confirm the metadata and press **Start automatic
    checks**. Leave the page untouched until the gesture button is enabled.
@@ -75,6 +78,13 @@ Deployment origins are metadata and do not change that source revision.
    opening**. A page reload is not a fresh applet opening. Keep raw reports local;
    publish a sanitized table containing revision, firmware, mode, UA, origin class,
    case ID, context outcome, error text and rendering checks.
+
+If **Open HTTPS test** returns to the local portal, try **Direct HTTPS probe** in
+the library footer. This loads Pages' canonical extensionless path with a 200
+response, avoiding the 308 returned by the `.html` URL. It uses identical probe
+bytes and carries the configured private LAN return address as a fragment.
+This tests a navigation hypothesis; a desktop 200 does not prove console
+reachability. Record a return-to-portal outcome separately from a WebGL result.
 
 The full matrix is three names (`webgl`, `experimental-webgl`, `webgl2`) × two
 attribute sets (omitted, minimal) × three creation conditions (visible automatic,

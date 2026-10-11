@@ -61,9 +61,9 @@ These deployment controls are covered by the documented CLI commands and
 
 | Origin | First fresh applet opening | Second fresh applet opening |
 | --- | --- | --- |
-| Captive connection-check hostname | 18/18 null; all six trusted taps completed | Pending |
-| Direct LAN address | 18/18 null; all six trusted taps completed | Pending |
-| Public HTTPS control | Owner recorded unreachable; no WebGL measurement | Pending |
+| Captive connection-check hostname | 18/18 null; all six trusted taps completed | 18/18 null after Wi-Fi reconnect; report received |
+| Direct LAN address | 18/18 null; all six trusted taps completed | Owner says repeated null; origin-specific saved report pending |
+| Public HTTPS control | Navigation returned to local portal; no WebGL measurement | Direct canonical link test pending |
 
 The console reports arrived at **01:17:53 and 01:19:27 on 2026-10-12**,
 Asia/Makassar (17:17:53 and 17:19:27 UTC on 2026-10-11), and match the published
@@ -74,7 +74,7 @@ opening number 1 and this exact UA:
 Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/613.0 (KHTML, like Gecko) NF/7.0.3.12.11 NintendoBrowser/5.2.0.55481
 ```
 
-All 36 context requests returned null, with **zero exceptions and zero
+All 36 first-comparison context requests returned null, with **zero exceptions and zero
 creation-error messages**. Neither WebGL constructor was exposed. Every attached
 creation canvas was fully onscreen; all detached cases were actually detached.
 Six requests per origin came directly from trusted clicks. The transient
@@ -84,10 +84,26 @@ six-second fallback delay. The page was visible and top-level. Its reported
 physical mode.
 
 Opening number and handheld mode are owner-selected metadata; applet closure was
-not independently observed. An earlier incomplete captive run retained 13 null
-cases and is documented without being counted as a completed comparison. HTTPS
-unreachability was an explicit owner observation on the captive page; the error
-message and cause have not yet been supplied. There is no HTTPS WebGL result.
+not independently observed. The owner confirms that Connection Test alone did
+not reopen the portal, while reconnecting Wi-Fi did. The second captive report
+arrived at **01:24:28 on 2026-10-12**, Asia/Makassar, with the same revision,
+firmware, UA and handheld selection: 18/18 null, six trusted clicks, no exceptions
+or creation-error text, and correct canvas placement. This brings the recorded
+completed total to **54 null context requests**. The owner's repeated-null answer
+is retained separately from the still-missing second origin-specific LAN report.
+An earlier incomplete captive run retained 13 null cases and is documented
+without being counted as a completed comparison.
+
+The owner clarified that HTTPS navigation **returns to the local portal**.
+The selective DNS log shows the console queried the public hostname and received
+public A records through normal upstream forwarding. Mac HTTPS checks verified
+the certificate and found that `/assets/webgl-research.html` returns **308** to
+`/assets/webgl-research`, whose response is **200**. The library's **Direct HTTPS
+probe** link now uses that canonical path and carries the same explicit LAN
+return fragment. Desktop browser navigation verified a single document-200
+response, correct return address and the unchanged probe revision. Whether the
+redirect contributes to the console's return is still unresolved. There is no
+HTTPS WebGL result until the console actually opens that page.
 
 The [sanitized measurements](../measurements/2026-10-12-switch-webgl.json) retain
 case names, requested attributes, trusted events, API exposure, geometry and

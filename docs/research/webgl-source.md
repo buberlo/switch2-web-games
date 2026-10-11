@@ -5,8 +5,10 @@ Research date: **2026-10-12** (Asia/Makassar). Scope: the stock Switch 2 browser
 **Current conclusion:** the first controlled standalone comparison returned
 18/18 null contexts on both the captive hostname and direct LAN origin, including
 trusted taps. There is **no accessible WebGL context in the tested stock applet
-on those HTTP origins**. HTTPS was reported unreachable and a second fresh
-opening remains pending. The reason is still unresolved. We have not obtained
+on those HTTP origins**. A second captive run after Wi-Fi reconnect reproduces
+18/18 null. HTTPS navigation returns to the local portal; its canonical-path
+control and the second origin-specific LAN report remain pending. The reason is
+still unresolved. We have not obtained
 Nintendo's matching source archive, and upstream WebKit is a reference for
 discriminating tests, not evidence of Nintendo's compiled configuration.
 
@@ -54,7 +56,13 @@ All attached canvases were fully onscreen and all six direct trusted taps per
 origin were recorded. Neither WebGL constructor was exposed. These measurements
 exclude Diablo and its heap. Both are labeled opening 1 by the owner; they do
 not establish two independent fresh applet openings. HTTPS was explicitly marked
-unreachable, so there is no secure-origin context result. An incomplete earlier
+unreachable, then clarified as a return to the local portal, so there is no
+secure-origin context result. A second captive report after Wi-Fi reconnect adds
+18/18 null with the same revision and correctly recorded trusted taps and canvas
+placement. All three complete reports total 54 null requests. The DNS log shows
+the public hostname was forwarded and resolved normally. A direct canonical
+HTTPS link tests whether the initial 308 contributes to failed navigation; that
+cause is not established. An incomplete earlier
 captive run retains 13 cases without being counted as complete.
 See [physical validation](webgl-validation.md#physical-origin-comparison) and
 [sanitized case measurements](../measurements/2026-10-12-switch-webgl.json).
@@ -168,12 +176,12 @@ that the cited upstream mechanisms exist.
 
 | Hypothesis | Source evidence | Physical observation | Next discriminating test | Confidence | Homebrew relevance |
 | --- | --- | --- | --- | --- | --- |
-| Existing attributes or detached-canvas handling cause failure | Khronos context attributes; current renderer settings | Both HTTP origins return null for omitted/minimal attributes, onscreen/detached canvases and direct trusted taps | Repeat after an independently fresh applet opening | Weakened by the controlled matrix | An ordinary compatible setup could remove the need for deeper platform work. |
+| Existing attributes or detached-canvas handling cause failure | Khronos context attributes; current renderer settings | Both HTTP origins return null for omitted/minimal attributes, onscreen/detached canvases and direct trusted taps; repeated captive run agrees | Finish the second LAN comparison and secure-origin navigation control | Weakened by the controlled matrix and repeated captive run | An ordinary compatible setup could remove the need for deeper platform work. |
 | WebGL is excluded at compile time | Upstream `ENABLE(WEBGL)` and conditional IDL | Constructors absent and all 36 complete requests null; this does not distinguish exclusion from runtime gating | Matching archive: inspect generated feature defines and build inputs, then reconcile with API exposure | Unresolved | Identifies an implementation boundary only; no method for installing a changed browser is established. |
 | The applet disables an embedding preference | Upstream runtime gate and native setter | Missing constructors and null returns are consistent with that gate but do not prove Nintendo uses it | Source trace of Nintendo/NetFront initialization; compare a demonstrably different stock entry point if reachable | Unresolved | Useful configuration lead if future independently established native access exists. No such access is demonstrated here. |
 | Graphics backend initialization fails or is unavailable | Upstream graphics-client creation path | Controlled requests have no exception or creation-error text | Inspect matching port behavior; absent events alone do not identify the stage | Unresolved | Porting/driver requirement, not proof of an exploitable failure. |
-| Origin or applet policy changes availability | Embedding policies may differ; Nintendo policy is not known | Captive and direct LAN results match; HTTPS is recorded unreachable | Diagnose HTTPS reachability, then repeat identical revision through reachable origins in a second fresh opening | Unresolved for HTTPS and other applets | May identify a reachable stock configuration; navigation alone is not an applet switch. |
-| Game memory pressure caused initial nulls | Probes ran before game initialization | Isolated page without Diablo also returns null across both HTTP origins | Second fresh applet opening to control residual applet state | Weakened further | Resource behavior only; no code-execution implication. |
+| Origin or applet policy changes availability | Embedding policies may differ; Nintendo policy is not known | Captive and direct LAN results match; repeated captive run agrees; HTTPS returns to portal despite normal DNS resolution | Test canonical HTTPS path without 308, then finish reachable-origin comparisons | Unresolved for HTTPS and other applets | May identify a reachable stock configuration; navigation alone is not an applet switch. |
+| Game memory pressure caused initial nulls | Probes ran before game initialization | Isolated page without Diablo also returns null across both HTTP origins and after Wi-Fi reconnect | Finish second LAN comparison to match origin controls | Weakened further | Resource behavior only; no code-execution implication. |
 
 ## Homebrew research ledger and stopping rule
 
