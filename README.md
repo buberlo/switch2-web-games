@@ -1,6 +1,6 @@
-# Switch Web Games
+# Switch 2 Web Games
 
-An experimental toolkit for running web games in the Nintendo Switch browser:
+An experimental toolkit for running web games in the Nintendo Switch 2 browser:
 a local captive-portal enabler, game hosting, compatibility probes, controls,
 saving and performance measurements. The long-term ambition is to support games
 as demanding as GTA V; no specific commercial game is the target.
@@ -28,8 +28,8 @@ The current privileged-service tooling is tested on macOS. The server itself
 has no Python package dependencies.
 
 ```sh
-git clone https://github.com/buberlo/switch-web-games.git
-cd switch-web-games
+git clone https://github.com/buberlo/switch2-web-games.git
+cd switch2-web-games
 # Install command-line tools if missing:
 xcode-select --install
 # With Homebrew installed:

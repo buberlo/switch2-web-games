@@ -1,6 +1,6 @@
 # Roadmap
 
-Build an open toolkit for running web games in the Nintendo Switch browser,
+Build an open toolkit for running web games in the Nintendo Switch 2 browser,
 progressing toward games as demanding as GTA V. This describes an ambition
 about game complexity, not a claim that a specific title runs today.
 

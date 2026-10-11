@@ -1,8 +1,8 @@
 {
-  "name": "switch-web-games",
+  "name": "switch2-web-games",
   "version": "0.1.0",
   "private": true,
-  "description": "Local captive portal, compatibility probes and browser game experiments for Nintendo Switch",
+  "description": "Local captive portal, compatibility probes and browser game experiments for Nintendo Switch 2",
   "engines": {"node": ">=20.18"},
   "scripts": {
     "dev": "python3 server/portal.py --host 127.0.0.1 --port 8090",

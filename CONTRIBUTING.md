@@ -1,6 +1,6 @@
 # Contributing
 
-The aim is to make increasingly demanding games run in the Nintendo Switch
+The aim is to make increasingly demanding games run in the Nintendo Switch 2
 browser. Games with the complexity and resource demands of GTA V are a useful
 long-term benchmark; no particular commercial game is the project target.
 
