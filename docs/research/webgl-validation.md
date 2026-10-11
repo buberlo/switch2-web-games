@@ -63,7 +63,7 @@ These deployment controls are covered by the documented CLI commands and
 | --- | --- | --- |
 | Captive connection-check hostname | 18/18 null; all six trusted taps completed | 18/18 null after Wi-Fi reconnect; report received |
 | Direct LAN address | 18/18 null; all six trusted taps completed | Owner says repeated null; origin-specific saved report pending |
-| Public HTTPS control | Navigation returned to local portal; no WebGL measurement | Direct canonical link test pending |
+| Public HTTPS control | Original URL returned to portal; direct canonical page opens and owner reports all null; separate first saved report absent | Returned report labels opening 2: 18/18 null in a secure context |
 
 The console reports arrived at **01:17:53 and 01:19:27 on 2026-10-12**,
 Asia/Makassar (17:17:53 and 17:19:27 UTC on 2026-10-11), and match the published
@@ -101,16 +101,30 @@ the certificate and found that `/assets/webgl-research.html` returns **308** to
 `/assets/webgl-research`, whose response is **200**. The library's **Direct HTTPS
 probe** link now uses that canonical path and carries the same explicit LAN
 return fragment. Desktop browser navigation verified a single document-200
-response, correct return address and the unchanged probe revision. Whether the
-redirect contributes to the console's return is still unresolved. There is no
-HTTPS WebGL result until the console actually opens that page.
+response, correct return address and the unchanged probe revision. The owner
+confirms that this direct page opens on the console and all checks return null.
+Whether the redirect caused the original return is still unresolved.
+
+The explicitly reviewed HTTPS report arrived at **01:34:57 on 2026-10-12**,
+Asia/Makassar. It records the public HTTPS origin, `secureContext:true`, the same
+revision and applet UA, firmware 23.0.1, handheld mode and selected opening 2.
+All 18 cases return null, with six trusted taps, correct canvas placement,
+missing WebGL constructors and no exceptions or creation-error messages. This
+brings the saved complete total to **72 null requests across four reports**.
+The owner confirms the requested save/repetition procedure was completed. Only
+one HTTPS report was received; a separate first HTTPS report and second LAN
+report are absent. Do not infer extra saved runs from repeated snapshot posts.
+Public results are URL-fragment imports submitted from the LAN, explicitly
+marked **untrusted**, and corroborated by the owner's observations; matching
+transport UA does not independently authenticate the public report's contents.
 
 The [sanitized measurements](../measurements/2026-10-12-switch-webgl.json) retain
 case names, requested attributes, trusted events, API exposure, geometry and
 outcomes. Private LAN addresses, transport addresses, random run identifiers and
-session data are omitted. The supported current conclusion is **“no accessible
-WebGL context in the tested stock applet on the two tested HTTP origins.”** The
-results do not distinguish compilation, embedding policy or backend failure.
+session data are omitted. The supported physical conclusion is **“no accessible
+WebGL context in the tested stock applet”** across captive HTTP, direct LAN HTTP
+and reachable public HTTPS. Origin, minimal attributes, canvas attachment and
+trusted input did not expose a usable context in these cases.
 
 Do not fill a pending cell from desktop results or an unreachable origin. For
 each physical result retain the exact probe revision, observed UA, firmware,
@@ -120,9 +134,23 @@ remain required.
 
 ## Source acquisition
 
-Nintendo's indexed OSS catalog identifies a Switch 2 **23.0.0 or later** archive,
-matching the owner-reported firmware range. Direct HTTPS retrieval, the web
-fetcher and installed Chrome all received HTTP 403. No archive was obtained and
-no archive hash or Nintendo build flag is claimed. The pinned upstream analysis
-and homebrew-relevant hypotheses remain clearly labeled in
-[the source report](webgl-source.md).
+Initial catalog retrieval received HTTP 403. A later official catalog fetch
+exposed the **Switch 2 23.0.0 or later** archive link; direct TLS-verified download
+returned HTTP 200 and **197,123,071 bytes**. ZIP CRC verification passed all
+40,478 entries. Archive SHA-256:
+`a2bcdfb7ec695d1ac5c790317a1239ccdb40e0ba8e052891c2ebba1314200f90`.
+
+The WKC version header identifies customer release **3.12.11** and WebKit
+**613.0**, matching the applet version strings. The corresponding WKC feature
+header sets both WebGL flags to **0**. Local Clang preprocessing of that header
+confirmed both values; this is a source-header check, not an applet build.
+The source therefore supports compilation exclusion as the leading explanation,
+while the shipped binary and final build inputs remain unverified. The browser
+initialization also defaults accelerated compositing off and contains native
+settings/backend gates that page JavaScript cannot override.
+
+The reproducible [source manifest](nintendo-webgl-source-manifest.json) and
+[source investigation](webgl-source.md) retain exact paths, hashes, line references,
+limitations and homebrew leads. The archive remains outside Git. The audit
+reproduced the manifest and rejected an incorrect-length archive. Neither source
+inspection nor physical null results enable hardware acceleration.

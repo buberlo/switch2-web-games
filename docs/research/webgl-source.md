@@ -2,15 +2,15 @@
 
 Research date: **2026-10-12** (Asia/Makassar). Scope: the stock Switch 2 browser.
 
-**Current conclusion:** the first controlled standalone comparison returned
-18/18 null contexts on both the captive hostname and direct LAN origin, including
-trusted taps. There is **no accessible WebGL context in the tested stock applet
-on those HTTP origins**. A second captive run after Wi-Fi reconnect reproduces
-18/18 null. HTTPS navigation returns to the local portal; its canonical-path
-control and the second origin-specific LAN report remain pending. The reason is
-still unresolved. We have not obtained
-Nintendo's matching source archive, and upstream WebKit is a reference for
-discriminating tests, not evidence of Nintendo's compiled configuration.
+**Current conclusion:** there is **no accessible WebGL context in the tested
+stock applet** across captive HTTP, direct LAN HTTP and reachable public HTTPS.
+Four saved complete reports contain 72 null requests, including trusted taps.
+Nintendo's official Switch 2 23.0.0+ archive was obtained: its WKC 3.12.11 source
+sets both WebGL feature flags to **0**, and its version header matches WebKit
+613.0/customer 3.12.11 in the applet UA. This establishes a compile-time gate in
+the distributed configuration and makes compilation exclusion the leading
+explanation. It does not independently establish the shipped binary's final
+build inputs. The approximate upstream references below remain separate.
 
 ## Device and physical evidence
 
@@ -55,46 +55,122 @@ origin. Each yielded 18 null returns, no exceptions and no creation-error text.
 All attached canvases were fully onscreen and all six direct trusted taps per
 origin were recorded. Neither WebGL constructor was exposed. These measurements
 exclude Diablo and its heap. Both are labeled opening 1 by the owner; they do
-not establish two independent fresh applet openings. HTTPS was explicitly marked
-unreachable, then clarified as a return to the local portal, so there is no
-secure-origin context result. A second captive report after Wi-Fi reconnect adds
+not establish two independent fresh applet openings. The original HTTPS URL was
+marked unreachable, then clarified as a return to the portal. A second captive
+report after Wi-Fi reconnect adds
 18/18 null with the same revision and correctly recorded trusted taps and canvas
-placement. All three complete reports total 54 null requests. The DNS log shows
+placement. Those three complete reports total 54 null requests. The DNS log shows
 the public hostname was forwarded and resolved normally. A direct canonical
-HTTPS link tests whether the initial 308 contributes to failed navigation; that
-cause is not established. An incomplete earlier
+HTTPS link opens on the console, but the initial redirect's role is unproven.
+The returned public report labels opening 2, records a secure context and the
+same firmware/UA/revision, and adds 18 null cases with correct trusted taps and
+canvas placement. The owner corroborates the null result and confirms the
+requested save/repeat procedure done. Imported results remain marked untrusted;
+only one HTTPS report was received. A separate first HTTPS report and second
+LAN report are absent, so the saved record does not establish two complete
+comparisons of every origin. An incomplete earlier
 captive run retains 13 cases without being counted as complete.
 See [physical validation](webgl-validation.md#physical-origin-comparison) and
 [sanitized case measurements](../measurements/2026-10-12-switch-webgl.json).
 
-## Source provenance and retrieval blocker
+## Official source acquisition and provenance
 
 Nintendo's [official OSS catalog](https://support.nintendo.com/jp/oss/index.html),
-as exposed by the search index on the research date, lists **Nintendo Switch 2
-23.0.0 or later**, 187 MB compressed and 694 MB expanded. This range includes the
+as exposed by the search index and subsequently the readable catalog, lists
+**Nintendo Switch 2 23.0.0 or later**, 187 MB compressed and 694 MB expanded. This range includes the
 owner's 23.0.1. The separate Nintendo Switch entry is 261 MB and must not be
 substituted for the Switch 2 archive.
 
-Live retrieval of the official index returned **HTTP 403** through the web
+Initial retrieval of the official index returned **HTTP 403** through the web
 fetcher, direct HTTPS curl, and one ordinary navigation in installed headless
 Google Chrome. The real browser reached the official URL and displayed a
 `403 Forbidden` title and body. Nintendo's legacy
 `https://www.nintendo.co.jp/support/oss/index.html` redirected to the same blocked
-page. Response headers and the small error bodies are retained under the ignored
-`data/qa/webgl-source/` directory. This is a retrieval failure, not evidence that
-Nintendo offers no source.
+page. Those headers and error bodies remain under ignored `data/qa/webgl-source/`.
+Later in the same investigation, the web fetcher obtained the catalog with its
+actual download links. The Switch 2 23.0.0+ link is
+[NS2_23.0.0.zip](https://support.nintendo.com/jp/oss/data/NS2_23.0.0.zip).
+Direct download returned HTTP 200 with certificate verification enabled.
 
 | Requested material | Verification state | Archive SHA-256 |
 | --- | --- | --- |
-| Nintendo Switch 2 OSS, 23.0.0 or later | Catalog entry observed; archive link/bytes not obtained | **Unavailable; no archive downloaded** |
+| Nintendo Switch 2 OSS, 23.0.0 or later | Official catalog link; 197,123,071 bytes; ZIP CRC passed | `a2bcdfb7ec695d1ac5c790317a1239ccdb40e0ba8e052891c2ebba1314200f90` |
 | Upstream WebKit reference | Selected files downloaded at commit `4fc253b3b03c475575f5f4edd1b1406bec0697c7`, committed 2026-10-11 16:29:03 UTC | Per-file hashes below; this is not a Nintendo archive |
 
-The next source acquisition step requires restored access to the official
-catalog, then following its Switch 2 23.0.0+ download link and recording the exact
-URL, final URL, byte length and SHA-256 before extraction. Do not invent the link,
-substitute a proprietary firmware dump, or call an unverified mirror matching.
-Inspect the archive's build manifests and port modifications alongside generic
-WebCore files; supplied source alone may still omit runtime applet settings.
+The downloaded URL and final URL are the same. All **40,478 ZIP entries** passed
+CRC; the expanded total is **728,410,973 bytes**. Extraction checked member paths
+and rejected absolute paths, traversal and symlinks. The archive contains two
+browser source families, `0.12.2` and `3.12.11`; the latter's `WKCVersion.h:33,35`
+matches the applet's customer release and WebKit version strings. This is the
+official matching firmware-range distribution, not proof of byte-identical
+installed binaries or complete proprietary applet/peer implementation.
+
+Reproduce the source audit without executing or extracting the downloaded code:
+
+```sh
+mkdir -p data/qa/webgl-source
+curl --fail --location --proto '=https' \
+  -o data/qa/webgl-source/NS2_23.0.0.zip \
+  https://support.nintendo.com/jp/oss/data/NS2_23.0.0.zip
+python3 scripts/audit_nintendo_webgl.py data/qa/webgl-source/NS2_23.0.0.zip \
+  > data/qa/webgl-source/audit.json
+diff -u docs/research/nintendo-webgl-source-manifest.json data/qa/webgl-source/audit.json
+```
+
+The audit rejects mismatched length/hash and verifies every ZIP CRC. Its
+[committed manifest](nintendo-webgl-source-manifest.json) records hashes and exact
+archive-relative line references for 13 inspected files. The source archive and
+extracted tree stay outside Git; vendor notices remain in the local archive.
+
+## Trace through Nintendo's supplied WKC configuration
+
+Paths below are relative to `NS2_23.0.0/` and pinned by that manifest.
+
+1. **Compile-time configuration.** `WKC_3.12.11/include/wkc/wkcconfig.h:23`
+   selects WKC. `webkit_3.12.11/WTF/wtf/PlatformEnable.h:103–104` includes
+   `FeatureDefinesWKC.h` for that platform. The supplied
+   `WKC_3.12.11/WTF/wtf/WKC/FeatureDefinesWKC.h:160–161` defines
+   `ENABLE_WEBGL 0` and `ENABLE_WEBGL2 0` without per-flag `ifndef` guards.
+   Local Clang preprocessing of this header confirms both zeros. This is not a
+   complete Nintendo build; undistributed final build inputs remain unverified.
+2. **Dispatch and API exposure.** In
+   `webkit_3.12.11/WebCore/html/HTMLCanvasElement.cpp:324–347`, WebGL dispatch is
+   compiled only with `ENABLE(WEBGL)`; otherwise the request falls through to
+   null. `WebCore/html/canvas/WebGLRenderingContext.idl:38` is also conditional
+   on WEBGL. Unlike the newer upstream reference below, this supplied IDL has no
+   `EnabledBySetting` annotation. The observed missing constructors and silent
+   null requests are consistent with the supplied compile-time exclusion.
+3. **Runtime settings would still matter in an enabled build.**
+   `HTMLCanvasElement.cpp:408–425` requires accelerated compositing for platforms
+   other than GTK/WinCairo and checks `webGLEnabled`. WKC initialization in
+   `WKC_3.12.11/WebKit/WKC/webkit/WKCWebView.cpp:637–644` defaults accelerated
+   drawing/compositing off while setting the WebGL runtime preference **true**.
+   That true value cannot restore compiled-out dispatch. It also means a claim
+   that this initialization simply sets `webGLEnabled:false` would be wrong.
+   The native helper `helpers/privates/WKCSettings.cpp:703–705` forwards settings;
+   no page JavaScript setter is established. Actual applet overrides are unknown.
+4. **Policy and backend initialization.** If enabled, supplied
+   `WebGLRenderingContextBase.cpp:819,878` checks the frame client's policy and
+   requests `hostWindow->createGraphicsContextGL`. WKC's frame loader forwards
+   `allowWebGL` to its embedding client under `ENABLE(WEBGL)`
+   (`WebCoreSupport/FrameLoaderClientWKC.cpp:1316–1320`). WKC initialization's
+   `wkcGLInitializePeer` call is likewise conditional (`WKCWebView.cpp:3646–3647`).
+   Native `WKCPrefs.cpp:576–579` calls `wkcGLActivatePeer` only when compiled in.
+   It is a native function, not a callable browser-page API.
+5. **Porting lead, not a proven backend.** The archive includes
+   `include/wkc/wkcglpeer.h` declarations for GL initialization/activation/context
+   creation and an older `GraphicsContext3DWKC.cpp` bridge calling those peers.
+   Their presence does not demonstrate an enabled or complete modern
+   `GraphicsContextGL` implementation. No concrete peer implementation or final
+   proprietary applet build was obtained. Changing one header is not established
+   as sufficient to build, install or enable graphics on a stock console.
+
+The same feature header also disables WebAssembly at line 156, consistent with
+the prior capability reports. Source settings for accelerated Canvas are leads
+for native port research; they are not a measured hardware-acceleration result.
+Page attributes, gesture timing, URLs and HTTPS cannot alter a compile-time gate.
+The supplied legacy `webkit-3d` alias sits inside that same gate and supplies no
+independent route around it, so the measured matrix is unchanged.
 
 The cached reference files have this identity. The complete paths, URLs, byte
 counts and hashes are in ignored `data/qa/webgl-source/upstream-sources.json`.
@@ -171,22 +247,23 @@ in Nintendo's selected configuration.
 
 ## Findings and next discriminating tests
 
-Confidence below concerns the **Switch-specific hypothesis**, not confidence
-that the cited upstream mechanisms exist.
+Confidence distinguishes the **supplied source configuration** from inference
+about the shipped Switch binary. Generic upstream features are not Nintendo
+configuration evidence.
 
 | Hypothesis | Source evidence | Physical observation | Next discriminating test | Confidence | Homebrew relevance |
 | --- | --- | --- | --- | --- | --- |
-| Existing attributes or detached-canvas handling cause failure | Khronos context attributes; current renderer settings | Both HTTP origins return null for omitted/minimal attributes, onscreen/detached canvases and direct trusted taps; repeated captive run agrees | Finish the second LAN comparison and secure-origin navigation control | Weakened by the controlled matrix and repeated captive run | An ordinary compatible setup could remove the need for deeper platform work. |
-| WebGL is excluded at compile time | Upstream `ENABLE(WEBGL)` and conditional IDL | Constructors absent and all 36 complete requests null; this does not distinguish exclusion from runtime gating | Matching archive: inspect generated feature defines and build inputs, then reconcile with API exposure | Unresolved | Identifies an implementation boundary only; no method for installing a changed browser is established. |
-| The applet disables an embedding preference | Upstream runtime gate and native setter | Missing constructors and null returns are consistent with that gate but do not prove Nintendo uses it | Source trace of Nintendo/NetFront initialization; compare a demonstrably different stock entry point if reachable | Unresolved | Useful configuration lead if future independently established native access exists. No such access is demonstrated here. |
-| Graphics backend initialization fails or is unavailable | Upstream graphics-client creation path | Controlled requests have no exception or creation-error text | Inspect matching port behavior; absent events alone do not identify the stage | Unresolved | Porting/driver requirement, not proof of an exploitable failure. |
-| Origin or applet policy changes availability | Embedding policies may differ; Nintendo policy is not known | Captive and direct LAN results match; repeated captive run agrees; HTTPS returns to portal despite normal DNS resolution | Test canonical HTTPS path without 308, then finish reachable-origin comparisons | Unresolved for HTTPS and other applets | May identify a reachable stock configuration; navigation alone is not an applet switch. |
-| Game memory pressure caused initial nulls | Probes ran before game initialization | Isolated page without Diablo also returns null across both HTTP origins and after Wi-Fi reconnect | Finish second LAN comparison to match origin controls | Weakened further | Resource behavior only; no code-execution implication. |
+| Existing attributes or detached-canvas handling cause failure | Khronos attributes; supplied gated dispatch | All three reachable origins return null for omitted/minimal attributes, onscreen/detached canvases and trusted taps | Preserve remaining repeat reports if obtained; no further arbitrary attribute variants justified | Weakened by controlled physical cases | No ordinary compatible configuration discovered. |
+| WebGL is excluded at compile time | Official WKC header disables both flags; platform include and conditional dispatch/IDL traced | Constructors absent and all 72 saved complete requests null | Final shipped build inputs or independent binary evidence; do not modify firmware | High for supplied source; leading inference for tested binary | A replacement implementation would require compiled feature support and a backend; no installation route established. |
+| The applet disables an embedding preference | Supplied runtime gates and native helpers; initialization sets WebGL true but accelerated compositing false | Silent nulls remain compatible with runtime gates | Determine actual applet overrides if independently obtainable | Applet-specific policy unresolved; false WebGL default is unsupported | Native settings alone cannot restore excluded code. |
+| Graphics backend initialization fails or is unavailable | Supplied host-window context call and conditional GL peers | No exception or creation-error text; disabled dispatch could prevent reaching backend entirely | Establish enabled build before assessing modern backend completeness | Backend viability unverified | GL peer declarations and old bridge identify porting work, not demonstrated acceleration or code execution. |
+| Origin or applet policy changes availability | Supplied native policy delegation; other applets' configuration unknown | Captive HTTP, LAN HTTP and reachable secure HTTPS all null | Different stock entry point only with a documented route to this probe | No benefit from tested origin change; other applets untested | Navigation within Wi-Fi applet is not a native applet change. |
+| Game memory pressure caused initial nulls | Pre-engine probes and standalone page | Isolated page also returns null across all three origins | No further heap stress needed to explain current evidence | Weakened | No code-execution implication. |
 
 ## Homebrew research ledger and stopping rule
 
 This pass has established a working stock page execution surface and specific
-upstream configuration boundaries worth comparing with Nintendo's OSS. It has
+matching-source compile, settings and backend boundaries. It has
 not established a vulnerability, native code execution, writable browser
 preferences, firmware modification, or a way to launch arbitrary URLs in other
 applets. UA version strings alone do not identify a vulnerable revision or prove
@@ -195,8 +272,9 @@ carried into this ledger.
 
 If the controlled matrix fails on every reachable origin, publish **“no
 accessible WebGL context in the tested stock applet”** with revision, UA,
-owner-reported firmware and physical mode. Leave compilation, embedding policy
-and backend failure unresolved until corresponding evidence distinguishes them.
+owner-reported firmware and physical mode. The matching supplied source now
+supports compilation exclusion; retain the final-build limitation and leave
+actual applet overrides and backend viability unresolved.
 A context that draws correct pixels advances to shader, visible animation,
 context recovery and real gameplay tests; it does not yet establish hardware
 acceleration or sustained gameplay performance.

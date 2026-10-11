@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "catalogUrl": "https://support.nintendo.com/jp/oss/index.html",
+  "archiveUrl": "https://support.nintendo.com/jp/oss/data/NS2_23.0.0.zip",
+  "archiveBytes": 197123071,
+  "archiveSha256": "a2bcdfb7ec695d1ac5c790317a1239ccdb40e0ba8e052891c2ebba1314200f90",
+  "zipCrcCheck": "passed",
+  "entryCount": 40478,
+  "expandedBytes": 728410973,
+  "scope": "Official firmware-range source; final shipped binary and build inputs unverified",
+  "files": [
+    {
+      "path": "NS2_23.0.0/WKC_3.12.11/WebKit/WKC/webkit/WKCVersion.h",
+      "bytes": 1328,
+      "sha256": "38aad5ec86d8688475ea12e125505ee8a34dbd7660f94ca00821ac7a7de7f356",
+      "references": [
+        {
+          "line": 33,
+          "text": "#define WKC_CUSTOMER_RELEASE_VERSION \"3.12.11\""
+        },
+        {
+          "line": 35,
+          "text": "#define WKC_WEBKIT_VERSION \"613.0\""
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/WKC_3.12.11/include/wkc/wkcconfig.h",
+      "bytes": 3905,
+      "sha256": "e25b9502504d8a259b339325f59c559c7fd2767ec28266b4c12924db3a16ca01",
+      "references": [
+        {
+          "line": 23,
+          "text": "#define WTF_PLATFORM_WKC 1"
+        },
+        {
+          "line": 147,
+          "text": "#define USE_WKC_CAIRO 1"
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/WKC_3.12.11/WTF/wtf/WKC/FeatureDefinesWKC.h",
+      "bytes": 7462,
+      "sha256": "5409d0539ef28c264dd305c1b22804326e9a284f3a84150c727416b105dcc3fc",
+      "references": [
+        {
+          "line": 156,
+          "text": "#define ENABLE_WEBASSEMBLY 0"
+        },
+        {
+          "line": 160,
+          "text": "#define ENABLE_WEBGL 0"
+        },
+        {
+          "line": 161,
+          "text": "#define ENABLE_WEBGL2 0"
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/webkit_3.12.11/WTF/wtf/PlatformEnable.h",
+      "bytes": 27234,
+      "sha256": "85d5b28ed5422f1c19f6ec3796e7e3d6b88c38d51e6a93694d84273ca54f933c",
+      "references": [
+        {
+          "line": 103,
+          "text": "#if PLATFORM(WKC)"
+        },
+        {
+          "line": 104,
+          "text": "#include \"FeatureDefinesWKC.h\""
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/webkit_3.12.11/WebCore/html/HTMLCanvasElement.cpp",
+      "bytes": 38118,
+      "sha256": "370feaf4447e5175103f2c80cba8361921a8b3b0cadcec7088857eb7e3a96d11",
+      "references": [
+        {
+          "line": 324,
+          "text": "#if ENABLE(WEBGL)"
+        },
+        {
+          "line": 347,
+          "text": "    return std::optional<RenderingContext> { std::nullopt };"
+        },
+        {
+          "line": 419,
+          "text": "    if (!settings.webGLEnabled())"
+        },
+        {
+          "line": 425,
+          "text": "    return settings.acceleratedCompositingEnabled();"
+        },
+        {
+          "line": 454,
+          "text": "    if (!shouldEnableWebGL(document().settings()))"
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/webkit_3.12.11/WebCore/html/canvas/WebGLRenderingContext.idl",
+      "bytes": 2008,
+      "sha256": "05c75787b3eecee3ad2fb2472e88bd71c6dee69ceaa2aa8e52b5fad42f23eadc",
+      "references": [
+        {
+          "line": 38,
+          "text": "    Conditional=WEBGL,"
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/webkit_3.12.11/WebCore/html/canvas/WebGLRenderingContextBase.cpp",
+      "bytes": 344550,
+      "sha256": "405e36ce222d88cea5867a7aa9b8f751e222f50279e0c6ce8b1b87cfe10cb6c9",
+      "references": [
+        {
+          "line": 819,
+          "text": "        if (!frame->loader().client().allowWebGL(frame->settings().webGLEnabled())) {"
+        },
+        {
+          "line": 878,
+          "text": "        context = hostWindow->createGraphicsContextGL(attributes);"
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/WKC_3.12.11/WebKit/WKC/webkit/WKCWebView.cpp",
+      "bytes": 161118,
+      "sha256": "da13a4544309dd90dc77caf8c0b3b440d4e89b60ad5bdfc9f39cbf7c3f6954ee",
+      "references": [
+        {
+          "line": 637,
+          "text": "    settings->setCanvasUsesAcceleratedDrawing(false);"
+        },
+        {
+          "line": 638,
+          "text": "    settings->setAcceleratedDrawingEnabled(false);"
+        },
+        {
+          "line": 641,
+          "text": "    settings->setAcceleratedCompositingEnabled(false);"
+        },
+        {
+          "line": 644,
+          "text": "    settings->setWebGLEnabled(true);"
+        },
+        {
+          "line": 3646,
+          "text": "#if ENABLE(WEBGL)"
+        },
+        {
+          "line": 3647,
+          "text": "    if (!wkcGLInitializePeer())"
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/WKC_3.12.11/WebKit/WKC/helpers/privates/WKCSettings.cpp",
+      "bytes": 20443,
+      "sha256": "3c76a5e5ba726f7a2605a25cb578dfb4523bf3d674671f353eb0d9f8ff73daad",
+      "references": [
+        {
+          "line": 703,
+          "text": "void WKCSettings::setWebGLEnabled(bool arg)"
+        },
+        {
+          "line": 705,
+          "text": "    PARENT()->setWebGLEnabled(arg);"
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/WKC_3.12.11/WebKit/WKC/WebCoreSupport/FrameLoaderClientWKC.cpp",
+      "bytes": 41459,
+      "sha256": "cd8cc6ad9320c595f95b41fa38669d93797590db76533d8c6fb2bedcf61533f4",
+      "references": [
+        {
+          "line": 1316,
+          "text": "#if ENABLE(WEBGL)"
+        },
+        {
+          "line": 1318,
+          "text": "FrameLoaderClientWKC::allowWebGL(bool enabledPerSettings)"
+        },
+        {
+          "line": 1320,
+          "text": "    return m_appClient->allowWebGL(enabledPerSettings);"
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/WKC_3.12.11/WebKit/WKC/webkit/WKCPrefs.cpp",
+      "bytes": 19289,
+      "sha256": "226d15afeaa94002901b85a8f9d7789c61a658f8a2e5cb8b67266df7b6a4f004",
+      "references": [
+        {
+          "line": 576,
+          "text": "activateWebGL()"
+        },
+        {
+          "line": 578,
+          "text": "#if ENABLE(WEBGL)"
+        },
+        {
+          "line": 579,
+          "text": "    bool ret = wkcGLActivatePeer();"
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/WKC_3.12.11/include/wkc/wkcglpeer.h",
+      "bytes": 24356,
+      "sha256": "45b7b0bd405c340aaec265c08661340d60fde6238296e3aaaa1b2c0967a162a7",
+      "references": [
+        {
+          "line": 93,
+          "text": "WKC_PEER_API bool wkcGLInitializePeer(void);"
+        },
+        {
+          "line": 102,
+          "text": "WKC_PEER_API bool wkcGLActivatePeer();"
+        },
+        {
+          "line": 158,
+          "text": "WKC_PEER_API void* wkcGLCreateContextPeer(WKCGLAttributes* inout_attr, void* in_hostwindow, void* in_layer);"
+        }
+      ]
+    },
+    {
+      "path": "NS2_23.0.0/WKC_3.12.11/WebCore/platform/graphics/WKC/GraphicsContext3DWKC.cpp",
+      "bytes": 65086,
+      "sha256": "c6043f5685c0c3e1f963f32c17e3c3d07fbe424a5050b1cf78a5f318d96148dc",
+      "references": [
+        {
+          "line": 31,
+          "text": "#if ENABLE(WEBGL)"
+        },
+        {
+          "line": 266,
+          "text": "    self->m_peer = wkcGLCreateContextPeer(&ga, (void *)hostwindow, self->m_layer);"
+        }
+      ]
+    }
+  ]
+}

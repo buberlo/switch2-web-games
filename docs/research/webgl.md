@@ -14,15 +14,17 @@ or the physical gameplay acceptance gate.
 - The new isolated matrix passes desktop positive and fault-injection tests.
   The first owner-selected handheld opening returned **18/18 null contexts on
   each HTTP origin**, including all trusted taps. A repeated captive run after
-  Wi-Fi reconnect also returned 18/18 null. HTTPS navigation returned to the
-  local portal; a direct canonical URL is available as the next control. The
-  second LAN report and usable HTTPS-origin measurement remain pending; see
+  Wi-Fi reconnect also returned 18/18 null. The direct canonical HTTPS URL opens;
+  its returned report records 18/18 null in a secure context. The second LAN
+  report and a separate saved first HTTPS run remain unavailable; see
   [validation and physical evidence](webgl-validation.md#physical-origin-comparison).
   Desktop SwiftShader drawing is harness validation, not evidence of Switch GPU
   access or gameplay speed.
-- Nintendo's catalog lists Switch 2 sources for 23.0.0 or later. Retrieval is
-  blocked by HTTP 403; no corresponding archive bytes or SHA-256 are claimed.
-  Pinned upstream source references are explicitly approximate.
+- Nintendo's official Switch 2 23.0.0+ archive was acquired and hashed after
+  initial HTTP 403 failures. Its WKC 3.12.11/WebKit 613.0 identity matches the
+  reported version strings and its feature header disables WebGL 1 and 2.
+  Final shipped build inputs are unverified; pinned upstream references remain
+  approximate. The source report includes reproducible archive-audit commands.
 
 ## Run without installing Diablo
 
@@ -83,8 +85,9 @@ If **Open HTTPS test** returns to the local portal, try **Direct HTTPS probe** i
 the library footer. This loads Pages' canonical extensionless path with a 200
 response, avoiding the 308 returned by the `.html` URL. It uses identical probe
 bytes and carries the configured private LAN return address as a fragment.
-This tests a navigation hypothesis; a desktop 200 does not prove console
-reachability. Record a return-to-portal outcome separately from a WebGL result.
+The owner confirms the direct page opens and the returned report records the
+public HTTPS origin. This does not establish why the original route failed.
+Record a return-to-portal outcome separately from a WebGL result.
 
 The full matrix is three names (`webgl`, `experimental-webgl`, `webgl2`) × two
 attribute sets (omitted, minimal) × three creation conditions (visible automatic,

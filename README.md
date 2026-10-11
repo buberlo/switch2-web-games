@@ -24,9 +24,11 @@ An isolated [WebGL research harness](docs/research/webgl.md) compares context
 creation, pixel rendering and recovery across captive, LAN and public HTTPS
 origins. On firmware **23.0.1**, the first handheld console comparison returned
 null for all 18 cases on both HTTP origins. A second captive run after Wi-Fi
-reconnect also returned 18/18 null. HTTPS navigation returned to the portal;
-the direct HTTPS link tests that route without its initial redirect. The harness does not change the
-game's renderer defaults. The
+reconnect also returned 18/18 null. The direct HTTPS page opens and its returned
+report also records 18/18 null in a secure context. Nintendo's corresponding
+23.0.0+ source archive sets WebGL 1 and 2 to zero in its WKC feature header;
+the shipped binary's final build inputs remain unverified. The harness does not
+change the game's renderer defaults. The
 [source investigation](docs/research/webgl-source.md) separates Nintendo evidence
 from upstream WebKit reference code.
 
