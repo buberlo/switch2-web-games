@@ -1,6 +1,6 @@
 /* Classic-script renderer. Indexed palettes are opaque RGBA; incoming buffers
- * are borrowed only until draw() returns. WebGL is selected only after a real
- * palette lookup and Canvas-copy pixel readback succeeds. */
+ * are copied before draw()/present() returns. WebGL and opt-in native BMP
+ * decoding are selected only after actual Canvas pixel readback succeeds. */
 (function (scope) {
   'use strict';
 
@@ -9,6 +9,19 @@
   function fill(array, value) {
     if (array.fill) { array.fill(value); return; }
     for (var i = 0; i < array.length; i++) array[i] = value;
+  }
+
+  function encodeBMP(width,height,indices,palette,topDown,previous) {
+    var stride=(width+3)&~3,length=1078+stride*height;
+    var bytes=previous&&previous.length===length?previous:new Uint8Array(length);
+    var header=new DataView(bytes.buffer,bytes.byteOffset,54);
+    header.setUint16(0,0x4d42,true);header.setUint32(2,length,true);header.setUint32(10,1078,true);
+    header.setUint32(14,40,true);header.setInt32(18,width,true);header.setInt32(22,topDown?-height:height,true);
+    header.setUint16(26,1,true);header.setUint16(28,8,true);header.setUint32(34,stride*height,true);header.setUint32(46,256,true);
+    for(var i=0;i<256;i++){var source=i*4,target=54+source;bytes[target]=palette[source+2];bytes[target+1]=palette[source+1];bytes[target+2]=palette[source];bytes[target+3]=0;}
+    if(topDown&&stride===width)bytes.set(indices,1078);
+    else for(var row=0;row<height;row++){var y=topDown?row:height-row-1;bytes.set(indices.subarray(y*width,(y+1)*width),1078+row*stride);}
+    return bytes;
   }
 
   function createGPU(document, version) {
@@ -115,8 +128,10 @@
     var paletteKnown=false,gpu=null,destroyed=false;
     var stripRows=8,stripCount=Math.ceil(height/stripRows),signatures=[],candidates=[],allIndexed=[],hasIndexed=[];
     var scratch=new Uint8Array(width*height*4),needsFullExpansion=false,previousText=false;
-    var capabilities={canvas2d:{status:'not-tested'},webgl1:{status:'not-tested'},webgl2:{status:'not-tested'},selected:'canvas2d-indexed'};
-    var renderer={mode:'canvas2d-indexed',capabilities:capabilities,draw:draw,destroy:destroy};
+    var bmpPrepared=false,bmpEnabled=false,bmpTopDown=true,bmpBytes=null,bmpStale=false,pendingJob=null;
+    var bmpURL=scope.URL||scope.webkitURL;
+    var capabilities={canvas2d:{status:'not-tested'},webgl1:{status:'not-tested'},webgl2:{status:'not-tested'},bmp:{status:'not-tested',reason:'Native BMP decoding was not requested.'},selected:'canvas2d-indexed'};
+    var renderer={mode:'canvas2d-indexed',capabilities:capabilities,prepare:prepare,present:present,draw:draw,destroy:destroy};
     try{
       var probeCanvas=document.createElement('canvas');probeCanvas.width=1;probeCanvas.height=1;
       var probe2d=probeCanvas.getContext('2d');probe2d.fillStyle='rgb(17,43,97)';probe2d.fillRect(0,0,1,1);
@@ -147,6 +162,80 @@
       }
     }else{capabilities.webgl1.reason='WebGL was disabled by the caller.';capabilities.webgl2.reason='WebGL was disabled by the caller.';}
     publish();
+
+    function cancelled() {var error=new Error('The Diablo renderer has been destroyed.');error.cancelled=true;return error;}
+    function mode(value) {if(renderer.mode!==value){renderer.mode=value;publish();}}
+    function cleanDecode(job) {
+      if(job.timer!==null){scope.clearTimeout(job.timer);job.timer=null;}
+      if(job.image){job.image.onload=job.image.onerror=null;try{job.image.src='';}catch(ignored){}job.image=null;}
+      if(job.url){try{bmpURL.revokeObjectURL(job.url);}catch(ignoredURL){}job.url=null;}
+    }
+    function finish(job,error,value) {
+      if(job.finished)return;job.finished=true;cleanDecode(job);
+      if(pendingJob===job)pendingJob=null;
+      job.done(error||null,value);
+    }
+    function jobFor(done) {
+      if(typeof done!=='function')throw new Error('Renderer completion callback is required.');
+      if(destroyed){done(cancelled());return null;}
+      if(pendingJob){done(new Error('A renderer presentation or probe is already pending.'));return null;}
+      var job={done:done,timer:null,image:null,url:null,finished:false};pendingJob=job;return job;
+    }
+    function decode(job,bytes,done) {
+      var settled=false,setupBegan=now();job.decodeSetupMs=0;
+      function complete(error) {
+        if(settled||job.finished)return;settled=true;
+        var decoded=job.image;
+        // drawImage must use the decoded image before its URL and src are cleared.
+        if(job.timer!==null){scope.clearTimeout(job.timer);job.timer=null;}
+        if(decoded)decoded.onload=decoded.onerror=null;
+        try{done(error,decoded);}finally{if(job.image===decoded)cleanDecode(job);}
+      }
+      try{
+        job.image=new scope.Image();job.url=bmpURL.createObjectURL(new scope.Blob([bytes],{type:'image/bmp'}));
+        job.image.onload=function(){complete(null);};
+        job.image.onerror=function(){complete(new Error('Native BMP image decoding failed.'));};
+        job.timer=scope.setTimeout(function(){complete(new Error('Native BMP image decoding timed out after 1000 ms.'));},1000);
+        job.image.src=job.url;
+        job.decodeSetupMs=now()-setupBegan;
+      }catch(error){job.decodeSetupMs=now()-setupBegan;complete(error);}
+    }
+    function prepare(done) {
+      var job=jobFor(done);if(!job)return;
+      if(bmpPrepared||options.preferBMP!==true||gpu){
+        if(gpu&&options.preferBMP===true)capabilities.bmp.reason='Verified WebGL is preferred.';
+        job.timer=scope.setTimeout(function(){finish(job,null,capabilities);},0);return;
+      }
+      bmpPrepared=true;
+      if(typeof scope.Blob!=='function'||typeof scope.Image!=='function'||typeof scope.DataView!=='function'||!bmpURL||typeof bmpURL.createObjectURL!=='function'||typeof bmpURL.revokeObjectURL!=='function'){
+        capabilities.bmp={status:'unavailable',reason:'Blob, Image, DataView and object URLs are required for native BMP decoding.'};publish();
+        job.timer=scope.setTimeout(function(){finish(job,null,capabilities);},0);return;
+      }
+      var colors=new Uint8Array(1024),pixels=new Uint8Array(257*2),probe=document.createElement('canvas'),attempts=[];
+      probe.width=257;probe.height=2;var probeContext=probe.getContext('2d');
+      for(var i=0;i<256;i++){colors[i*4]=i;colors[i*4+1]=(i*7)&255;colors[i*4+2]=(i*13)&255;colors[i*4+3]=i&1?255:0;}
+      for(var p=0;p<pixels.length;p++)pixels[p]=p<257?p&255:(513-p)&255;
+      function attempt(topDown) {
+        var encoded;
+        try{encoded=encodeBMP(257,2,pixels,colors,topDown);}catch(error){capabilities.bmp={status:'failed',reason:errorText(error)};publish();finish(job,null,capabilities);return;}
+        decode(job,encoded,function(error,decoded){
+          if(!error)try{
+            probeContext.drawImage(decoded,0,0);var actual=probeContext.getImageData(0,0,257,2).data;
+            for(var b=0;b<actual.length;b++)if(actual[b]!==((b&3)===3?255:colors[pixels[b>>2]*4+(b&3)]))throw new Error('Native BMP palette, padding or orientation pixel readback did not match.');
+          }catch(readError){error=readError;}
+          cleanDecode(job);
+          if(error){
+            attempts.push({orientation:topDown?'top-down':'bottom-up',reason:errorText(error)});
+            if(topDown){attempt(false);return;}
+            capabilities.bmp={status:'failed',reason:errorText(error),attempts:attempts};publish();finish(job,null,capabilities);return;
+          }
+          bmpTopDown=topDown;bmpEnabled=true;
+          capabilities.bmp={status:'passed',pixelReadback:true,paletteReadback:true,paddingReadback:true,orientation:topDown?'top-down':'bottom-up',attempts:attempts};
+          renderer.mode='bmp-indexed';publish();finish(job,null,capabilities);
+        });
+      }
+      attempt(true);
+    }
 
     function setPalette(bytes) {
       if(!bytes||bytes.length!==1024)throw new Error('Indexed rendering requires a 256-color RGBA palette.');
@@ -208,10 +297,9 @@
       for(var i=0;i<text.length;i++){var t=text[i];context.fillStyle='#'+('000000'+(t.color&0xffffff).toString(16)).slice(-6);context.fillText(t.text,t.x,t.y+22);}
       context.restore();
     }
-    function draw(batch) {
-      if(destroyed)throw new Error('The Diablo renderer has been destroyed.');
+    function retainBatch(batch) {
       batch=batch||{};var images=batch.images||[],text=batch.text||[],paletteChanged=false,rgbaDirty=null;
-      var result={mode:renderer.mode,indexedRects:0,rgbaRects:0,convertedPixels:0,skippedPixels:0,signatureMs:0,conversionMs:0,paletteChanged:false};
+      var result={mode:renderer.mode,indexedRects:0,rgbaRects:0,convertedPixels:0,skippedPixels:0,signatureMs:0,conversionMs:0,paletteChanged:false,encodeMs:0,decodeMs:0,presentationMs:0,canvasCpuMs:0};
       if(batch.palette)paletteChanged=setPalette(batch.palette)||paletteChanged;
       for(var i=0;i<images.length;i++){
         var rect=images[i],indexed=rect.format==='indexed';
@@ -220,14 +308,21 @@
         else{result.rgbaRects++;if(!rgbaDirty)rgbaDirty={top:rect.y,bottom:rect.y+rect.h};else{rgbaDirty.top=Math.min(rgbaDirty.top,rect.y);rgbaDirty.bottom=Math.max(rgbaDirty.bottom,rect.y+rect.h);}}
         try{retain(rect,indexed,stride);}catch(error){if(!gpu)throw error;loseGPU(errorText(error));retain(rect,indexed,stride);}
       }
+      result.paletteChanged=paletteChanged;
+      return {result:result,text:text,clip:batch.clip,rgbaDirty:rgbaDirty};
+    }
+    function drawRetained(retained) {
+      var result=retained.result,text=retained.text,rgbaDirty=retained.rgbaDirty;
       if(gpu){
         try{
           gpu.draw();
           var operation=context.globalCompositeOperation;context.globalCompositeOperation='copy';context.drawImage(gpu.canvas,0,0);context.globalCompositeOperation=operation;
-          drawText(text,batch.clip);previousText=!!text.length;
-          result.paletteChanged=paletteChanged;result.mode=renderer.mode;return result;
+          drawText(text,retained.clip);previousText=!!text.length;
+          result.mode=renderer.mode;return result;
         }catch(error){loseGPU(errorText(error));}
       }
+      mode('canvas2d-indexed');
+      if(bmpStale){needsFullExpansion=true;dirtyAll();bmpStale=false;}
       var top=rgbaDirty?rgbaDirty.top:height,bottom=rgbaDirty?rgbaDirty.bottom:0;
       for(var s=0;s<stripCount;s++){
         if(!candidates[s])continue;candidates[s]=false;
@@ -263,10 +358,65 @@
       needsFullExpansion=false;
       if(previousText||text.length){top=0;bottom=height;}
       if(bottom>top)context.putImageData(image,0,0,0,top,width,bottom-top);
-      drawText(text,batch.clip);previousText=!!text.length;
-      result.mode=renderer.mode;result.paletteChanged=paletteChanged;return result;
+      drawText(text,retained.clip);previousText=!!text.length;
+      result.mode=renderer.mode;return result;
     }
-    function destroy() {destroyed=true;if(gpu){var old=gpu;gpu=null;old.dispose();}indices=mask=rgba=rgbaWords=scratch=ones=zeros=paletteWords=paletteBytes=image=null;signatures=[];}
+    function draw(batch) {
+      if(destroyed)throw cancelled();
+      if(pendingJob)throw new Error('A renderer presentation or probe is already pending.');
+      var began=now(),result=drawRetained(retainBatch(batch));
+      result.canvasCpuMs=result.presentationMs=now()-began;return result;
+    }
+    function completelyIndexed() {for(var s=0;s<stripCount;s++)if(!allIndexed[s])return false;return paletteKnown;}
+    function present(batch,done) {
+      var job=jobFor(done);if(!job)return;
+      var began=now(),retained,result,cpuTime=0;
+      function fallback(error) {
+        if(error){
+          bmpEnabled=false;capabilities.bmp={status:'failed',reason:errorText(error),previouslyPassed:true,orientation:bmpTopDown?'top-down':'bottom-up'};
+          renderer.mode='canvas2d-indexed';publish();
+        }
+        var cpuBegan=now();
+        try{drawRetained(retained);result.canvasCpuMs=cpuTime+now()-cpuBegan;result.presentationMs=now()-began;finish(job,null,result);}
+        catch(drawError){finish(job,drawError);}
+      }
+      try{
+        retained=retainBatch(batch);result=retained.result;
+        if(!bmpEnabled||gpu||!completelyIndexed()){
+          drawRetained(retained);result.canvasCpuMs=result.presentationMs=now()-began;
+          job.timer=scope.setTimeout(function(){finish(job,null,result);},0);return;
+        }
+        // Text has no transfer buffer, but keep its snapshot stable until decoding finishes.
+        var copiedText=[];
+        for(var t=0;t<retained.text.length;t++){var item=retained.text[t];copiedText.push({text:item.text,x:item.x,y:item.y,color:item.color});}
+        retained.text=copiedText;retained.clip=retained.clip?retained.clip.slice():null;
+        bmpStale=true;
+        var encodeBegan=now();bmpBytes=encodeBMP(width,height,indices,paletteBytes,bmpTopDown,bmpBytes);result.encodeMs=now()-encodeBegan;
+        cpuTime=now()-began;
+        var decodeBegan=now();
+        decode(job,bmpBytes,function(error,decoded){
+          result.encodeMs+=job.decodeSetupMs;cpuTime+=job.decodeSetupMs;
+          result.decodeMs=Math.max(0,now()-decodeBegan-job.decodeSetupMs);
+          if(error){fallback(error);return;}
+          var drawBegan=now(),operation=context.globalCompositeOperation;
+          try{
+            context.globalCompositeOperation='copy';context.drawImage(decoded,0,0);context.globalCompositeOperation=operation;
+            drawText(retained.text,retained.clip);previousText=!!retained.text.length;
+            mode('bmp-indexed');result.mode=renderer.mode;result.canvasCpuMs=cpuTime+now()-drawBegan;result.presentationMs=now()-began;
+          }catch(drawError){context.globalCompositeOperation=operation;fallback(drawError);return;}
+          finish(job,null,result);
+        });
+      }catch(error){
+        if(retained&&bmpEnabled){cpuTime=now()-began;job.timer=scope.setTimeout(function(){fallback(error);},0);}
+        else job.timer=scope.setTimeout(function(){finish(job,error);},0);
+      }
+    }
+    function destroy() {
+      if(destroyed)return;destroyed=true;
+      if(gpu){var old=gpu;gpu=null;old.dispose();}
+      indices=mask=rgba=rgbaWords=scratch=ones=zeros=paletteWords=paletteBytes=image=bmpBytes=null;signatures=[];
+      if(pendingJob)finish(pendingJob,cancelled());
+    }
     return renderer;
   };
 }(window));

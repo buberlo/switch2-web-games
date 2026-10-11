@@ -6,9 +6,10 @@
   "engines": {"node": ">=20.18"},
   "scripts": {
     "dev": "python3 server/portal.py --host 127.0.0.1 --port 8090",
-    "test:protocol": "node tests/test_frame_protocol.cjs && node tests/test_input_protocol.cjs",
+    "test:protocol": "node tests/test_frame_protocol.cjs && node tests/test_input_protocol.cjs && node tests/test_presentation_protocol.cjs",
     "test:browser": "node tests/browser_smoke.cjs",
     "test:renderer": "node tests/test_renderer.cjs",
+    "test:native-renderer": "node tests/test_native_renderer.cjs",
     "test:benchmark": "node tests/test_benchmark.cjs",
     "test:diagnostics": "node tests/test_diagnostics.cjs"
   },

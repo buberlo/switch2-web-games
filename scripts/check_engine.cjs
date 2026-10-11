@@ -2,7 +2,7 @@
 'use strict';
 
 // Exercise the real JavaScript-only engine and real shareware archive in a
-// browser-shaped VM. This checks initialization and deterministic menu/town
+// browser-shaped VM. This checks initialization and deterministic game
 // pixel output, not physical Switch playability. Run with Node 20 or newer.
 const fs = require('fs');
 const vm = require('vm');
@@ -28,7 +28,7 @@ const options = {
 for (let i = 2; i < process.argv.length; i++) {
   const flag = process.argv[i];
   if (flag === '--help') {
-    console.log('Usage: node scripts/check_engine.cjs [--engine PATH] [--asset PATH] [--output JSON_PATH] [--with-intro] [--offscreen] [--indexed] [--no-audio] [--profile] [--without-memory-builtins] [--frame-digests] [--scene menu|town|town-reload] [--reload-save PATH] [--save-dir PATH]');
+    console.log('Usage: node scripts/check_engine.cjs [--engine PATH] [--asset PATH] [--output JSON_PATH] [--with-intro] [--offscreen] [--indexed] [--no-audio] [--profile] [--without-memory-builtins] [--frame-digests] [--scene menu|town|town-reload|dungeon-reload] [--reload-save PATH] [--save-dir PATH]');
     process.exit(0);
   }
   if (flag === '--with-intro') { options.withIntro = true; continue; }
@@ -45,7 +45,7 @@ for (let i = 2; i < process.argv.length; i++) {
   }
   if (flag === '--scene') {
     options.scene = process.argv[++i];
-    assert(['menu', 'town', 'town-reload'].includes(options.scene), 'Expected menu, town, or town-reload scene');
+    assert(['menu', 'town', 'town-reload', 'dungeon-reload'].includes(options.scene), 'Expected menu, town, town-reload, or dungeon-reload scene');
     continue;
   }
   if (!['--engine', '--asset', '--output'].includes(flag) || !process.argv[i + 1]) {
@@ -55,7 +55,8 @@ for (let i = 2; i < process.argv.length; i++) {
 }
 
 const engineSource = fs.readFileSync(options.engine, 'utf8');
-assert(!options.reloadSave || options.scene === 'town-reload', '--reload-save requires town-reload');
+assert(!options.reloadSave || ['town-reload', 'dungeon-reload'].includes(options.scene), '--reload-save requires a reload scene');
+assert(options.scene !== 'dungeon-reload' || options.reloadSave, 'dungeon-reload requires --reload-save with a local cathedral save');
 const archive = fs.readFileSync(options.asset);
 assert.strictEqual(archive.length, 25830791, 'Expected the pinned shareware archive');
 assert.strictEqual(archive.subarray(0, 4).toString('hex'), '4d50511a', 'Expected MPQ magic');
@@ -85,6 +86,7 @@ async function scenario(mode) {
   let frameDigest = null;
   let lastTerrainCache = null;
   const terrainCacheResets = [];
+  const terrainCachePeak = {entries: 0, spanBytes: 0};
   let consumerMs = 0;
   function consumeRGBA(x, y, width, height, data) {
     assert(width > 0 && height > 0, 'Empty render rectangle');
@@ -178,13 +180,19 @@ async function scenario(mode) {
   for (const name of ['Init', 'Render', 'Mouse', 'Key', 'Char', 'SyncTextPtr', 'SyncText']) {
     assert.strictEqual(typeof engine['_DApi_' + name], 'function', 'Missing engine export: ' + name);
   }
+  result.engineExports = Object.keys(engine).filter(name => name.startsWith('_DApi_')).sort();
+  assert.deepStrictEqual(result.engineExports,
+    ['AllocPacket', 'Char', 'Init', 'Key', 'Mouse', 'Render', 'SyncText', 'SyncTextPtr'].map(name => '_DApi_' + name).sort(),
+    'Production engine contains unexpected DApi exports');
   const initStarted = performance.now();
   engine._DApi_Init(0, options.offscreen ? 1 : 0, 1, 0, 0);
   result.initMs = Math.round(performance.now() - initStarted);
   const renderTimes = [];
   const engineTimes = [];
   const inputTimes = [];
-  const tickCount = options.scene === 'town-reload' ? 240 : 120;
+  const dungeon = options.scene === 'dungeon-reload';
+  const reload = dungeon || options.scene === 'town-reload';
+  const tickCount = dungeon ? 640 : reload ? 240 : 120;
   for (let tick = 1; tick <= tickCount; tick++) {
     const inputStarted = performance.now();
     // Only the optional upstream startup needs Escape; it exits the default
@@ -207,7 +215,7 @@ async function scenario(mode) {
         engine._DApi_Mouse(2, 1, 0, 400, 280);
       }
     }
-    if (options.scene === 'town-reload') {
+    if (reload) {
       const press = code => { engine._DApi_Key(0, 0, code); engine._DApi_Key(1, 0, code); };
       if (tick === 130 || tick === 150) engine._DApi_Char(122); // zoom both ways
       if (tick === 160 || tick === 180) press(27); // in-game menu
@@ -215,8 +223,30 @@ async function scenario(mode) {
       if (tick === 175 && options.reloadSave) files['spawn0.sv'] = new Uint8Array(fs.readFileSync(options.reloadSave));
       if (tick === 182) { press(40); press(40); press(40); } // Load Game
       if (tick === 184) press(13);
-      if (tick === 210 || tick === 220) engine._DApi_Char(99); // character panel
-      if (tick === 230) { engine._DApi_Mouse(1, 1, 0, 240, 260); engine._DApi_Mouse(2, 1, 0, 240, 260); }
+      if (!dungeon && (tick === 210 || tick === 220)) engine._DApi_Char(99); // character panel
+      if (!dungeon && tick === 230) { engine._DApi_Mouse(1, 1, 0, 240, 260); engine._DApi_Mouse(2, 1, 0, 240, 260); }
+      if (dungeon) {
+        // Only normal public inputs are used: load a local synthetic/owned
+        // cathedral save, then exercise both zooms, panels, walking and reload.
+        // Calls 185-214 warm the scene; 215-334 measure stationary rendering.
+        if (tick === 335 || tick === 355) engine._DApi_Char(122);
+        if (tick === 375 || tick === 395) engine._DApi_Char(105);
+        if (tick === 415 || tick === 435) engine._DApi_Char(99);
+        if (tick === 455 || tick === 515) {
+          const point = tick === 455 ? [360, 240] : [260, 200];
+          engine._DApi_Mouse(0, 0, 0, ...point);
+          engine._DApi_Mouse(1, 1, 0, ...point); engine._DApi_Mouse(2, 1, 0, ...point);
+        }
+        if (tick === 575 || tick === 590) press(27);
+        if (tick === 577) press(13); // save cathedral progress
+        if (tick === 592) { press(40); press(40); press(40); }
+        if (tick === 594) press(13); // ordinary Load Game again
+        if (tick === 184 || tick === 594) {
+          const phase = result.phases[result.phases.length - 1];
+          assert(phase?.name === 'game-ready' && phase.details?.value === 1,
+            'Dungeon replay did not finish loading cathedral level 1');
+        }
+      }
     }
     if (tick === 80) engine._DApi_Mouse(0, 0, 0, 320, 240);
     inputTimes.push(performance.now() - inputStarted);
@@ -227,6 +257,12 @@ async function scenario(mode) {
     if (engine.switchTerrainCache && engine.switchTerrainCache !== lastTerrainCache) {
       lastTerrainCache = engine.switchTerrainCache; terrainCacheResets.push(tick);
     }
+    if (engine.switchTerrainCache) {
+      const cache = engine.switchTerrainCache;
+      assert(cache.count <= 2048 && cache.bytes <= 2097152, 'Terrain cache exceeded its bounds during replay');
+      terrainCachePeak.entries = Math.max(terrainCachePeak.entries, cache.count);
+      terrainCachePeak.spanBytes = Math.max(terrainCachePeak.spanBytes, cache.bytes);
+    }
     renderTimes.push(renderMs);
     engineTimes.push(renderMs - (consumerMs - consumerBefore));
   }
@@ -234,16 +270,22 @@ async function scenario(mode) {
   if (engine.switchTerrainCache) {
     const entries = Object.values(engine.switchTerrainCache.entries);
     const spanBytes = entries.reduce((sum, spans) => sum + spans.byteLength, 0);
-    assert(entries.length <= 2048 && spanBytes <= 2097152, 'Town cache exceeded its bounds');
-    result.terrainCache = {entries: entries.length, spanBytes, resets: terrainCacheResets,
+    assert(entries.length <= 2048 && spanBytes <= 2097152, 'Terrain cache exceeded its bounds');
+    result.terrainCache = {entries: entries.length, spanBytes, peak: terrainCachePeak, resets: terrainCacheResets,
       tileTypes: [...new Set(Object.keys(engine.switchTerrainCache.entries).map(key => Number(key.split(':')[1])))].sort()};
-    if (options.scene === 'town-reload') {
-      assert(terrainCacheResets.includes(184), 'Load Game did not invalidate town cache');
+    if (reload) {
+      assert(terrainCacheResets.includes(184), 'Load Game did not invalidate terrain cache');
+      if (dungeon) assert(terrainCacheResets.includes(594), 'Second dungeon reload did not invalidate terrain cache');
       assert.strictEqual(result.phases[result.phases.length - 1]?.name, 'game-ready', 'Load Game did not finish its loading phase');
     }
   }
   result.warmRenderTimingMs = summarizeTiming(renderTimes.slice(30));
   result.warmEngineTimingMs = summarizeTiming(engineTimes.slice(30));
+  if (dungeon) {
+    result.dungeonWarmEngineTimingMs = summarizeTiming(engineTimes.slice(214, 334));
+    result.dungeonTimingMethod = '120 stationary cathedral render calls (215-334), after 30 warmup calls following normal Load Game; test conversion/hash excluded, browser painting/transfer excluded.';
+    result.reloadedSaveSha256 = crypto.createHash('sha256').update(fs.readFileSync(options.reloadSave)).digest('hex');
+  }
   result.maxInputMs = Math.round(Math.max(...inputTimes));
   if (options.scene !== 'menu') result.heroAcceptMs = Math.round(inputTimes[29]);
   result.timingMethod = 'renderTimingMs: synchronous _DApi_Render including test pixel conversion/hash; warmEngineTimingMs subtracts that consumer, calls31-' + tickCount + '. Init and input/level-loading callbacks are separate; no browser paint, audio playback, or transfer cost.';

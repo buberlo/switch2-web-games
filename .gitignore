@@ -6,6 +6,7 @@ vendor/
 data/
 web/engine/*
 !web/engine/.gitkeep
+web/assets/runtime.json
 node_modules/
 test-results/
 playwright-report/

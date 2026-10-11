@@ -10,10 +10,10 @@ JavaScript; the Mac serves files and stores saves. A tested WebGL palette
 renderer is available for supporting browsers, with a Canvas 2D fallback.
 The measured Switch applet returns no WebGL context and uses Canvas.
 
-**Current physical result:** an earlier optimized build reached 16.5–16.7 FPS
-in the menu and 9.9–10.2 FPS in town, successfully creating a temporary warrior.
-The newer town cache and Canvas improvements have passed local tests; physical
-retest is pending. Dungeon gameplay and a ten-minute session are not qualified.
+**Current physical result:** the preceding build reached approximately 20 FPS
+in the menu and 8.4–12.3 FPS in town. The new dungeon optimization and experimental
+native BMP renderer passed local correctness and gameplay tests; their Switch
+performance is pending. Dungeon gameplay and a ten-minute session are not qualified.
 
 The broader game library follows that physical acceptance gate. See the
 [roadmap](docs/roadmap.md), [verification record](docs/verification.md) and
@@ -154,29 +154,68 @@ palette, avoiding its per-pixel RGBA conversion. The page tests an actual GPU
 shader and its copy to the visible Canvas before selecting WebGL. If that fails,
 Canvas compares eight-row signatures, expands changed 32-pixel segments on
 sparse rows, and handles dense rows directly. Native cached town tile spans
-avoid repeated terrain decoding. No GPU feature is assumed from API presence
-alone.
+avoid repeated terrain decoding. The latest appended patch extends the cache
+to resolved solid, unlit or prelit dungeon tiles; masked, translated-light and
+fully dark tiles retain the original path. No GPU feature is assumed from API
+presence alone.
+
+`/play/diablo?renderer=bmp` selects an experimental native image decoder.
+It packs the retained indexed framebuffer and palette into an uncompressed
+8-bit BMP using bulk copies, then presents it through Blob → Image → Canvas.
+An actual pixel probe checks every palette entry, row orientation and odd-width
+padding, trying top-down rows before bottom-up compatibility. A decode failure
+or one-second timeout presents the retained frame with Canvas and disables BMP
+for that session. `?renderer=canvas` selects the comparison control. The default
+still uses verified WebGL where available, otherwise Canvas. Native image
+decoding is not evidence of GPU acceleration.
 
 The display adapter allows one transferable frame in transit, combining dirty
-rectangles while the page is busy. Silent hosts skip unused audio file decoding.
+rectangles while the page is busy. It counts frames and returns transferred
+buffers only after asynchronous presentation completes. Silent hosts skip
+unused audio file decoding.
 Character loading displays an overlay, measures the synchronous input callback,
 and discards stale presses queued during loading while preserving releases.
 Actual Switch performance of this revision remains to be measured. Comparison
-builds support `--with-intro`, `--legacy-blit`, `--legacy-terrain`, and
-`--legacy-memory`.
+builds support `--with-intro`, `--legacy-blit`, `--legacy-terrain`,
+`--legacy-dungeon-terrain`, and `--legacy-memory`. The dungeon comparison flag
+retains the town cache. Matched local interpreter runs reduced median dungeon
+render time by 24–32%; those CPU results do not predict Switch FPS.
+
+Preserve comparison builds outside Git before replacing the served engine:
+
+```sh
+python3 scripts/build_engine.py --legacy-dungeon-terrain --output data/comparison/baseline.js
+python3 scripts/build_engine.py --output data/comparison/candidate.js
+```
+
+Each output has adjacent `.build.json` metadata. Keep the served engine and its
+`build.json` together when rolling back, then regenerate the runtime identity.
 
 To fetch an updated build on an already running console, return to **Library**
 and choose **Play Diablo**, then start it. If the applet has closed, run
 **Connection Test** again. The server sends assets with `Cache-Control: no-store`;
 frontend and engine updates do not require restarting the LAN services.
+The default engine build generates `web/assets/runtime.json` with separate
+engine, frontend and combined revision hashes. After editing frontend files,
+run `python3 scripts/build_runtime.py`; `--check` rejects a stale identity.
+A welcome page left open across a revision change must be reloaded before Start.
 
 **Switch speed test** on the Library opens `/play/diablo?benchmark=1`. It starts
-automatically, measures the menu, creates a temporary warrior, and measures town.
+automatically, measures the menu, creates a temporary warrior, and measures
+stationary and moving town sequences.
 Keep the page visible and leave its controls still. This mode neither reads nor
-writes the normal save profile and disables audio. It polls engine metadata and
-repeats automatically after a new engine is published, once loading has finished.
-The Mac records measurements and actual renderer capabilities. These short
-measurements do not replace the physical gameplay acceptance session.
+writes the normal save profile and disables audio. It polls the combined runtime
+identity and repeats after an engine or frontend update, once loading has finished.
+The Mac records engine, encoding, decoding, presentation and input-delay timings
+separately, alongside actual renderer capabilities.
+
+**Compare Canvas and BMP** opens `/play/diablo?benchmark=1&compare=renderers`.
+Leave it visible without controls for about 6–8 minutes. It runs three ordered
+Canvas/BMP pairs with fresh temporary warriors, six seconds of menu, twenty
+seconds stationary and twenty seconds walking in each run. Walking uses ten
+fixed deadlines; excessively late commands invalidate the run. A failed native
+probe stops the comparison and reports the reason. No comparison automatically
+changes the default. These probes do not replace physical gameplay acceptance.
 
 Run local checks:
 
@@ -186,6 +225,7 @@ node scripts/check_engine.cjs
 node scripts/check_engine.cjs --scene town-reload --indexed --no-audio --frame-digests
 node tests/test_frame_protocol.cjs
 node tests/test_input_protocol.cjs
+node tests/test_presentation_protocol.cjs
 ```
 
 For browser checks, install Node.js 20.18+ and Google Chrome, then install the
@@ -197,8 +237,10 @@ npm ci
 node tests/browser_smoke.cjs
 node tests/test_diagnostics.cjs
 node tests/test_renderer.cjs
+node tests/test_native_renderer.cjs
 node tests/test_benchmark.cjs
 SMOKE_GPU=1 node tests/browser_smoke.cjs
+SMOKE_BMP=1 node tests/browser_smoke.cjs
 ```
 
 The gameplay browser test uses a temporary profile, checks creation, movement,
@@ -206,9 +248,11 @@ inventory, save/reload and the main-thread fallback with WebAssembly/WebGL
 disabled, and writes screenshots/results into `data/qa/`. It does not overwrite
 your normal saves. The diagnostics suite tests actual drawing/API execution,
 input reporting and failure recovery. Renderer tests compare actual GPU and
-Canvas pixels, including palette changes and context loss. The benchmark suite
-checks automatic character creation, measured windows, build-change reload,
-and an unchanged save profile. Network/socket permission is needed for
+Canvas pixels, including palette changes and context loss. Native tests check
+pixel decoding, mixed formats, timeout/error fallback, cancellation and URL
+cleanup. The benchmark suite checks automatic character creation, fixed walking
+inputs, paired ordering, frontend-only reload, and an unchanged save profile.
+Network/socket permission is needed for
 local tests. No GitHub Actions or remote CI is used.
 
 ## Physical acceptance gate

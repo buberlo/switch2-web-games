@@ -1,0 +1,252 @@
+{
+  "date": "2026-10-11",
+  "scope": "Local correctness and CPU measurements. Physical Switch 2 comparison and ten-minute gameplay acceptance remain pending.",
+  "engineSha256": "e2c23cbdbfadc4b27301300df3837426328eddc232cf07bfd6225d1b0818c357",
+  "frontendSha256": "c95f9de9cdfc2fdb65677214a1228a674056a64accf7b79e2c3cce7e90e43301",
+  "revisionSha256": "e3189ccb6f2431c5db5f8bcaa8297e4762d7f494c6ede0a8bee4f6cf5061c3b8",
+  "nativeRendererDefault": false,
+  "hardwareAccelerationConfirmed": false,
+  "dungeonComparison": {
+    "baselineSha256": "e532ae6926c10371b7ba9c6d36566344f722e8c1d1e00855ad47f2bf1e413276",
+    "candidateSha256": "e2c23cbdbfadc4b27301300df3837426328eddc232cf07bfd6225d1b0818c357",
+    "difference": "SWITCH_FAST_DUNGEON_TERRAIN only; baseline keeps the native town cache.",
+    "compiler": "Emscripten 3.1.74, WASM=0",
+    "method": "Sequential Node --jitless; ordinary Load Game of isolated synthetic cathedral save; 30 warmup then 120 stationary calls. Excludes test conversion/hash, browser presentation, transfers and input loading.",
+    "checks": [
+      {
+        "baseline": "baseline-dungeon",
+        "candidate": "candidate-dungeon",
+        "mode": "worker",
+        "frames": 686,
+        "pixelsSha256": "c5a3c25eb41ec6ee07f96658f33a77ecd1dbe6f700ee32023fc84fafc3d23cbc",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "baseline-dungeon",
+        "candidate": "candidate-dungeon",
+        "mode": "main",
+        "frames": 686,
+        "pixelsSha256": "c5a3c25eb41ec6ee07f96658f33a77ecd1dbe6f700ee32023fc84fafc3d23cbc",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "candidate-dungeon",
+        "candidate": "candidate-no-builtins",
+        "mode": "worker",
+        "frames": 686,
+        "pixelsSha256": "c5a3c25eb41ec6ee07f96658f33a77ecd1dbe6f700ee32023fc84fafc3d23cbc",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "candidate-dungeon",
+        "candidate": "candidate-no-builtins",
+        "mode": "main",
+        "frames": 686,
+        "pixelsSha256": "c5a3c25eb41ec6ee07f96658f33a77ecd1dbe6f700ee32023fc84fafc3d23cbc",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "baseline-cross-save",
+        "candidate": "candidate-cross-save",
+        "mode": "worker",
+        "frames": 686,
+        "pixelsSha256": "c5a3c25eb41ec6ee07f96658f33a77ecd1dbe6f700ee32023fc84fafc3d23cbc",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "baseline-cross-save",
+        "candidate": "candidate-cross-save",
+        "mode": "main",
+        "frames": 686,
+        "pixelsSha256": "c5a3c25eb41ec6ee07f96658f33a77ecd1dbe6f700ee32023fc84fafc3d23cbc",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "baseline-town",
+        "candidate": "candidate-town",
+        "mode": "worker",
+        "frames": 283,
+        "pixelsSha256": "6cffa5f1d2f21351dce371d467e0f44f02c4da5366aa29a5de66a8083b283cc9",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "baseline-town",
+        "candidate": "candidate-town",
+        "mode": "main",
+        "frames": 283,
+        "pixelsSha256": "6cffa5f1d2f21351dce371d467e0f44f02c4da5366aa29a5de66a8083b283cc9",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "baseline-offscreen",
+        "candidate": "candidate-offscreen",
+        "mode": "worker",
+        "frames": 160,
+        "pixelsSha256": "f55f620839df8cc5a5437825ef3e8fe5bbbc453533e6febb541cb7aed6590332",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "baseline-offscreen",
+        "candidate": "candidate-offscreen",
+        "mode": "main",
+        "frames": 160,
+        "pixelsSha256": "f55f620839df8cc5a5437825ef3e8fe5bbbc453533e6febb541cb7aed6590332",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "baseline-jitless",
+        "candidate": "candidate-jitless",
+        "mode": "worker",
+        "frames": 686,
+        "pixelsSha256": "c5a3c25eb41ec6ee07f96658f33a77ecd1dbe6f700ee32023fc84fafc3d23cbc",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "baseline-jitless",
+        "candidate": "candidate-jitless",
+        "mode": "main",
+        "frames": 686,
+        "pixelsSha256": "c5a3c25eb41ec6ee07f96658f33a77ecd1dbe6f700ee32023fc84fafc3d23cbc",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "candidate-dungeon",
+        "candidate": "candidate-jitless",
+        "mode": "worker",
+        "frames": 686,
+        "pixelsSha256": "c5a3c25eb41ec6ee07f96658f33a77ecd1dbe6f700ee32023fc84fafc3d23cbc",
+        "exact": true,
+        "exits": 0
+      },
+      {
+        "baseline": "candidate-dungeon",
+        "candidate": "candidate-jitless",
+        "mode": "main",
+        "frames": 686,
+        "pixelsSha256": "c5a3c25eb41ec6ee07f96658f33a77ecd1dbe6f700ee32023fc84fafc3d23cbc",
+        "exact": true,
+        "exits": 0
+      }
+    ],
+    "timing": [
+      {
+        "mode": "worker",
+        "baseline": {
+          "first": 26.4,
+          "mean": 23.9,
+          "median": 22.8,
+          "p95": 32.8,
+          "max": 41.4
+        },
+        "candidate": {
+          "first": 14.5,
+          "mean": 16.2,
+          "median": 15.5,
+          "p95": 20.2,
+          "max": 32.2
+        },
+        "medianReductionPercent": 32.0,
+        "candidateCache": {
+          "entries": 218,
+          "spanBytes": 79632,
+          "peak": {
+            "entries": 607,
+            "spanBytes": 220260
+          },
+          "resets": [
+            30,
+            184,
+            594
+          ],
+          "tileTypes": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      },
+      {
+        "mode": "main",
+        "baseline": {
+          "first": 19.1,
+          "mean": 21.2,
+          "median": 20.3,
+          "p95": 25.3,
+          "max": 44
+        },
+        "candidate": {
+          "first": 15.2,
+          "mean": 15.7,
+          "median": 15.5,
+          "p95": 17.6,
+          "max": 19.5
+        },
+        "medianReductionPercent": 23.6,
+        "candidateCache": {
+          "entries": 218,
+          "spanBytes": 79632,
+          "peak": {
+            "entries": 607,
+            "spanBytes": 220260
+          },
+          "resets": [
+            30,
+            184,
+            594
+          ],
+          "tileTypes": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      }
+    ]
+  },
+  "localVerification": {
+    "pythonTests": 49,
+    "nativeRendererCases": 20,
+    "existingRendererCases": 13,
+    "objectURLs": {
+      "created": 30,
+      "revoked": 30,
+      "maximumLive": 1
+    },
+    "es5Scripts": 9,
+    "gameplay": "Canvas, BMP and optional WebGL passed isolated desktop character creation, scaled input, movement, inventory, save/reload and Worker/main-thread execution. No wasm requests.",
+    "benchmark": "Two real-engine runs; one frontend-only restart; zero save API operations; existing profiles unchanged. Six ordered comparison-controller runs, failed probe and late walking rejection passed.",
+    "desktopPresentedFps": {
+      "menu": 19.97,
+      "stationaryTown": 19.97,
+      "movingTown": 20.02
+    }
+  },
+  "physical": {
+    "previousEngineSha256": "ef1a9cd3ac35b35941b62d069d5dbd6d62574756cf3e6ca8771d746c3c8cc37e",
+    "previousMenuPresentedFpsApproximate": 20,
+    "previousTownPresentedFpsSamples": [
+      8.440913604766633,
+      12.278978388998036
+    ],
+    "candidateStatus": "pending",
+    "manualGameplayAcceptance": "pending"
+  }
+}

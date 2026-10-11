@@ -1,6 +1,6 @@
 # Diablo shareware engine and assets
 
-This private local setup uses the Diablo shareware engine adapted by d07RiV
+This local setup uses the Diablo shareware engine adapted by d07RiV
 from the Devilution reconstruction. Diablo and its game data belong to Blizzard.
 This project is unofficial and is not affiliated with Blizzard.
 
@@ -47,12 +47,17 @@ code provides `Uint8Array.copyWithin`/`fill` fallbacks using native `set` when
 those methods are absent. `--legacy-memory` restores compiled memory loops;
 `--output PATH` writes a comparison artifact without replacing the served one.
 
-The default `SWITCH_FAST_TERRAIN` path caches decoded spans for the town's
-unlit, unmasked microtiles and copies their rows with native typed arrays.
-It preserves the original row clipping and drawing order; dungeon, lit and
-masked terrain keeps the upstream renderer. Black town diamonds use native
-row fills with the same upper/lower clipping conditions. `--legacy-terrain`
-restores both original town paths. The cache holds integer offsets, not heap
+The default `SWITCH_FAST_TERRAIN` path caches decoded spans and copies their
+rows with native typed arrays. `SWITCH_FAST_DUNGEON_TERRAIN` extends eligibility
+after the upstream renderer resolves the source and transparency mask: only
+solid-mask, untranslated, non-dark spans are cached. This includes unlit town
+tiles and already-prelit dungeon speed-cels. Masked, table-translated and fully
+dark terrain keeps the upstream renderer. Original row clipping and drawing
+order are preserved. Black town diamonds use native row fills with the same
+upper/lower clipping conditions; dungeon black fills are unchanged.
+`--legacy-dungeon-terrain` restores the prior town-only optimization for a
+matched comparison, while `--legacy-terrain` restores all original terrain
+paths. Build metadata records both selections. The cache holds integer offsets, not heap
 views or pixel copies, and resets in both `FreeGameMem` and `LoadLvlGFX`, so a
 reused allocation address cannot refer to an earlier level. It is limited to
 2,048 entries and 2 MiB of span buffers; the extended town test uses 573 entries
@@ -84,6 +89,20 @@ frame's geometry and pixel digest. `--save-dir PATH` exports these synthetic
 saves, and `--reload-save PATH` substitutes an older build's archive before
 the reload to verify compatibility. Cache bounds and reload invalidation are
 checked when the optimized cache is present.
+
+`--scene dungeon-reload --reload-save PATH` loads a local cathedral-level save
+through ordinary in-game Load, then exercises both zoom modes, inventory,
+character panels, two walking inputs, and a second save/load. It requires
+`game-ready(value=1)` after each load and verifies cache invalidation. The
+`dungeonWarmEngineTimingMs` measurement covers 120 stationary calls after 30
+warmup calls following the first load. This scene uses only production inputs;
+all checks reject unexpected engine `DApi` exports, including private debug or
+level-entry helpers. Use a synthetic or disposable save and keep it outside
+Git. Loading such a fixture does not prove ordinary dungeon entrance traversal
+or physical-console playability. Compare baseline and candidate using the same
+fixture, fixed browser clock and `--frame-digests`; old save archives can then
+be cross-loaded to verify compatibility. Run timing comparisons sequentially
+without concurrent builds. No desktop interpreter timing predicts Switch FPS.
 
 The original full-game serializer copies player animation pointers into its
 payload. Therefore rebuilding with a different memory layout can change a

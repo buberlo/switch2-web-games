@@ -1,0 +1,32 @@
+--- a/Source/render.cpp
++++ b/Source/render.cpp
+@@ -9,7 +9,7 @@
+ // Cache only integer source offsets and span lengths, never a heap view.
+ // FreeGameMem and LoadLvlGFX invalidate source identity even if malloc later
+ // reuses the same address. Cap both entry count and owned span-buffer bytes.
+-EM_JS(int, api_draw_town_tile, (int dst, int src, int tile, int clipLow, int clipHigh), {
++EM_JS(int, api_draw_solid_tile, (int dst, int src, int tile, int clipLow, int clipHigh), {
+     var cache = Module['switchTerrainCache'];
+     if (!cache) cache = Module['switchTerrainCache'] = {entries: Object.create(null), count: 0, bytes: 0};
+     var key = src + ':' + tile;
+@@ -271,12 +271,17 @@
+ //#endif
+ 
+ #if defined(EMSCRIPTEN) && defined(SWITCH_FAST_TERRAIN)
+-    // Town tiles have no light lookup or transparency mask. Keep every dungeon,
+-    // masked, and lit case on the original renderer until separately verified.
++    // Resolve speed-cel source and transparency first. Only solid unlit/prelit
++    // spans are equivalent to native copies; translated, masked and dark rows
++    // retain the original renderer below.
++#if defined(SWITCH_FAST_DUNGEON_TERRAIN)
++    if (mask == &SolidMask[31] && tbl == NULL && light_table_index != lightmax) {
++#else
+     if (leveltype == DTYPE_TOWN && light_table_index == 0 && !cel_transparency_active) {
++#endif
+         BYTE *clipLow = &gpBuffer[(zoomflag ? 160 : 143) * BUFFER_WIDTH];
+         BYTE *clipHigh = &gpBuffer[(zoomflag ? 512 : 320) * BUFFER_WIDTH];
+-        if (api_draw_town_tile((int)dst, (int)src, tile, (int)clipLow, (int)clipHigh))
++        if (api_draw_solid_tile((int)dst, (int)src, tile, (int)clipLow, (int)clipHigh))
+             return;
+     }
+ #endif

@@ -9,6 +9,7 @@
     var dirty = null, latest = null, inFlight = false, sequence = 0, waitingSequence = 0;
     var ticks = 0, tickTotal = 0, tickMax = 0, bridgeTotal = 0, sentFrames = 0, coalesced = 0;
     var inputTotal = 0, inputMax = 0, inputCalls = 0;
+    var inputQueueTotal = 0, inputQueueMax = 0, inputLatencyTotal = 0, inputLatencyMax = 0;
     var loading = false, discardBefore = 0;
     function memoryCapabilities() {
       var result = {}, probe = new Uint8Array([1,2,3,4,5,6]);
@@ -74,9 +75,12 @@
           send('metrics', {fps: frames * 1000 / (end - lastStats), heapBytes: engine.HEAPU8.length,
             tickMs:tickTotal / ticks, maxTickMs:tickMax, bridgeMs:bridgeTotal / ticks,
             sentFrames:sentFrames, coalescedFrames:coalesced, pendingRender:inFlight, format:format,
-            inputMs:inputCalls ? inputTotal / inputCalls : 0, maxInputMs:inputMax, sections:sections});
+            inputMs:inputCalls ? inputTotal / inputCalls : 0, maxInputMs:inputMax,
+            inputQueueMs:inputCalls ? inputQueueTotal / inputCalls : 0, maxInputQueueMs:inputQueueMax,
+            inputLatencyMs:inputCalls ? inputLatencyTotal / inputCalls : 0, maxInputLatencyMs:inputLatencyMax, sections:sections});
           frames = ticks = tickTotal = tickMax = bridgeTotal = sentFrames = coalesced = 0; lastStats = end;
           inputTotal = inputMax = inputCalls = 0;sections = Object.create(null);
+          inputQueueTotal = inputQueueMax = inputLatencyTotal = inputLatencyMax = 0;
         }
       } catch (e) { fail(e); }
     }
@@ -169,13 +173,15 @@
             if (id) send('input-complete',{id:id,milliseconds:0,discarded:true});
             return;
           }
-          var started = performance.now();
+          var started = performance.now(),queueMs=typeof sentAt==='number'?Math.max(0,Date.now()-sentAt):0;
           if (name === 'text') {
             var text = String(args[0]).slice(0,255), ptr = engine._DApi_SyncTextPtr(), i;
             for (i=0;i<text.length;i++) engine.HEAPU8[ptr+i] = text.charCodeAt(i) & 255;
             engine.HEAPU8[ptr+i] = 0; engine._DApi_SyncText(args[1] || 0);
           } else if (['DApi_Mouse','DApi_Key','DApi_Char'].indexOf(name) >= 0) engine['_' + name].apply(null,args);
           var duration = performance.now() - started;inputTotal += duration;inputMax = Math.max(inputMax,duration);inputCalls++;
+          inputQueueTotal+=queueMs;inputQueueMax=Math.max(inputQueueMax,queueMs);
+          inputLatencyTotal+=queueMs+duration;inputLatencyMax=Math.max(inputLatencyMax,queueMs+duration);
           if (duration >= 1000) discardBefore = Date.now();
           if (duration >= 100) send('input-timing',{name:name,milliseconds:duration,id:id || null});
           if (id) send('input-complete',{id:id,milliseconds:duration});

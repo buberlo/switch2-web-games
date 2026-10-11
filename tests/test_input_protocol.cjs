@@ -181,11 +181,26 @@ function workerPreservesInputEnvelope() {
   assert.deepEqual(forwarded, [['DApi_Key', args, 17, 123456]], 'the worker must preserve request ID and send time for quarantine');
 }
 
+async function inputQueueLatency() {
+  const h = await harness(), sentAt = h.now();
+  h.advance(75);h.onInput(() => h.advance(4));
+  h.host.event('DApi_Mouse', [1, 1, 0, 320, 280], 1, sentAt);
+  h.advance(2000);h.tick();
+  const metrics = h.messages.find(message => message.action === 'metrics');
+  assert.equal(metrics.inputMs, 4);
+  assert.equal(metrics.inputQueueMs, 75);
+  assert.equal(metrics.maxInputQueueMs, 75);
+  assert.equal(metrics.inputLatencyMs, 79);
+  assert.equal(metrics.maxInputLatencyMs, 79);
+  h.host.stop();
+}
+
 (async () => {
   await slowInputQuarantinesQueuedActions();
   await slowBoundary();
   await explicitLoadingPhases();
   await loadingInsideInput();
+  await inputQueueLatency();
   workerPreservesInputEnvelope();
   console.log('Input protocol passed: stale actions, held-input releases, completions, phase barriers, duration metrics, and worker timestamps.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

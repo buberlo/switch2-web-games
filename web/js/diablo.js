@@ -5,11 +5,17 @@
   var started=false, ready=false, useSpell=false, workerMode=false, firstFrame=true, metricReports=0, lastMetricReport=0;
   var pixelImage, directImage=typeof ImageData!=='undefined', drawTotal=0, drawMax=0, drawCount=0, lastPresented=0, lastPresentationTime=0, deliveryLag=0;
   var convertedPixels=0,skippedPixels=0,signatureTotal=0,conversionTotal=0;
+  var encodingTotal=0,decodingTotal=0,presentationTotal=0,canvasCpuTotal=0,presentationPending=false,presentationGeneration=0;
   var pointer={x:320,y:240}, pressed={}, keys={}, lastPointer=0, pending=Object.create(null), saving=false, saveFailed=false;
   var compat=location.search.indexOf('compat=1')>=0, mainOnly=location.search.indexOf('main=1')>=0;
   var benchmark=/(?:^|[?&])benchmark=1(?:&|$)/.test(location.search);
+  var rendererMatch=/(?:^|[?&])renderer=(bmp|canvas)(?:&|$)/.exec(location.search),rendererChoice=rendererMatch?rendererMatch[1]:'auto';
   var state=window.diabloStatus={loaded:false,frames:0,inputs:0,error:null,mode:null,save:null,metrics:[]};
   state.benchmark=benchmark;state.benchmarkWrites=0;
+  state.rendererChoice=rendererChoice;state.presentationPending=false;
+  // Capture the published identity while this page's scripts are loading,
+  // rather than attributing a welcome page left open to a later revision.
+  var pageRuntime=request('GET','/assets/runtime.json').then(json).catch(function(e){return {error:e.message};});
   var inputBlocked=false, barrierSequence=0, recentInputs=[], lastHeartbeat=0, lastPhaseAt=0;
   if(compat)window.WebAssembly=undefined;
   function request(method,url,body,headers,onProgress){
@@ -31,6 +37,7 @@
   }
   function report(event,extra){
     var snapshot={kind:'game',event:event,game:'diablo-shareware',mode:state.mode,engineSha256:state.engineSha256,
+      frontendSha256:state.frontendSha256,revisionSha256:state.revisionSha256,rendererChoice:rendererChoice,
       renderProtocol:'bounded-indexed-v2',renderer:renderer&&renderer.mode||'Canvas 2D',phase:state.phase||null,
       ua:navigator.userAgent,ts:new Date().toISOString()};
     Object.keys(extra||{}).forEach(function(k){snapshot[k]=extra[k];});
@@ -39,9 +46,14 @@
   function loading(text,value){$('load-status').textContent=text;if(value!==undefined){$('progress').hidden=false;$('progress').value=value;}}
   function error(message){
     state.error=String(message);releaseInputs();ready=false;state.loaded=false;
+    stopRendering();
     if(transport)transport.stop();if(audio)audio.stop();
     $('error-message').textContent=state.error;$('failure').hidden=false;$('welcome').hidden=true;
     blockInputs(false);$('runtime-status').textContent='Stopped';report('error',{message:state.error,recentInputs:recentInputs});
+  }
+  function stopRendering(){
+    presentationGeneration++;presentationPending=false;state.presentationPending=false;
+    if(renderer&&renderer.destroy)renderer.destroy();
   }
   function blockInputs(value){
     if(value&&!inputBlocked)lastPhaseAt=Date.now();
@@ -88,9 +100,9 @@
   }
   function draw(batch){
     if(!context)throw new Error('Canvas 2D is unavailable in this browser.');
+    if(renderer)return renderer.draw(batch);
     var began=performance.now();
-    if(renderer){var statistics=renderer.draw(batch);convertedPixels+=statistics.convertedPixels;skippedPixels+=statistics.skippedPixels;signatureTotal+=statistics.signatureMs;conversionTotal+=statistics.conversionMs;state.renderer=renderer.mode;}
-    else batch.images.forEach(function(rect){
+    batch.images.forEach(function(rect){
       var image;
       if(directImage){try{image=new ImageData(new Uint8ClampedArray(rect.bytes.buffer,rect.bytes.byteOffset,rect.bytes.byteLength),rect.w,rect.h);}catch(e){directImage=false;}}
       if(image)context.putImageData(image,rect.x,rect.y);
@@ -102,12 +114,40 @@
         context.putImageData(pixelImage,0,0,rect.x,rect.y,rect.w,rect.h);
       }
     });
-    if(!renderer&&batch.text.length){
+    if(batch.text.length){
       context.save();if(batch.clip){var c=batch.clip;context.beginPath();context.rect(c[0],c[1],c[2]-c[0],c[3]-c[1]);context.clip();}
       context.font='bold 13px Georgia, serif';batch.text.forEach(function(t){context.fillStyle='#'+('000000'+(t.color&0xffffff).toString(16)).slice(-6);context.fillText(t.text,t.x,t.y+22);});context.restore();
     }
-    var duration=performance.now()-began;drawTotal+=duration;drawMax=Math.max(drawMax,duration);drawCount++;
-    state.frames++;if(firstFrame){firstFrame=false;lastPresentationTime=performance.now();report('first-frame');}
+    var duration=performance.now()-began;
+    return {convertedPixels:0,skippedPixels:0,signatureMs:0,conversionMs:0,canvasCpuMs:duration,presentationMs:duration};
+  }
+  function present(data){
+    if(presentationPending)throw new Error('A second frame arrived before presentation completed.');
+    presentationPending=true;state.presentationPending=true;
+    var began=performance.now(),generation=presentationGeneration,settled=false,activeTransport=transport;
+    function done(failure,statistics){
+      if(settled)return;settled=true;
+      if(generation!==presentationGeneration)return;
+      presentationPending=false;state.presentationPending=false;
+      if(failure){if(!failure.cancelled)error(failure.message||String(failure));return;}
+      statistics=statistics||{};
+      var duration=performance.now()-began;
+      convertedPixels+=statistics.convertedPixels||0;skippedPixels+=statistics.skippedPixels||0;
+      signatureTotal+=statistics.signatureMs||0;conversionTotal+=statistics.conversionMs||0;
+      encodingTotal+=statistics.encodeMs||0;decodingTotal+=statistics.decodeMs||0;
+      presentationTotal+=typeof statistics.presentationMs==='number'?statistics.presentationMs:duration;
+      canvasCpuTotal+=typeof statistics.canvasCpuMs==='number'?statistics.canvasCpuMs:duration;
+      drawTotal+=duration;drawMax=Math.max(drawMax,duration);drawCount++;state.frames++;
+      if(renderer)state.renderer=renderer.mode;
+      if(firstFrame){firstFrame=false;lastPresentationTime=performance.now();report('first-frame');}
+      try{
+        if(activeTransport===transport&&transport&&transport.acknowledge){
+          transport.acknowledge(data.sequence,data.batch.images.length?data.batch.images[0].bytes.buffer:null);
+        }
+      }catch(e){error(e.message);}
+    }
+    try{if(renderer&&renderer.present)renderer.present(data.batch,done);else done(null,draw(data.batch));}
+    catch(e){done(e);}
   }
   function receive(data){
     try{
@@ -115,8 +155,7 @@
       case 'loaded':ready=true;state.loaded=true;state.nativeMemory=data.nativeMemory;$('welcome').hidden=true;$('game').hidden=false;$('runtime-status').textContent='Running · '+state.mode;if(benchmark)$('save-status').textContent='Temporary character · saves disabled';canvas.focus();report('loaded',{audio:state.audioEnabled,benchmark:benchmark,nativeMemory:data.nativeMemory});break;
       case 'render':
         lastHeartbeat=Date.now();
-        deliveryLag=Math.max(0,Date.now()-(data.sentAt||Date.now()));draw(data.batch);
-        if(transport&&transport.acknowledge)transport.acknowledge(data.sequence,data.batch.images.length?data.batch.images[0].bytes.buffer:null);
+        deliveryLag=Math.max(0,Date.now()-(data.sentAt||Date.now()));present(data);
         break;
       case 'progress':loading(data.message);break;
       case 'phase':
@@ -144,14 +183,20 @@
         var timing={fps:presentFps,engineFps:data.fps,frames:state.frames,inputs:state.inputs,heapBytes:data.heapBytes,
           tickMs:data.tickMs,maxTickMs:data.maxTickMs,bridgeMs:data.bridgeMs,canvasMs:drawCount?drawTotal/drawCount:0,
           maxCanvasMs:drawMax,deliveryLagMs:deliveryLag,coalescedFrames:data.coalescedFrames,sentFrames:data.sentFrames,
-          format:data.format,inputMs:data.inputMs,maxInputMs:data.maxInputMs,sections:data.sections,
+          format:data.format,inputMs:data.inputMs,maxInputMs:data.maxInputMs,
+          inputQueueMs:data.inputQueueMs,maxInputQueueMs:data.maxInputQueueMs,
+          inputLatencyMs:data.inputLatencyMs,maxInputLatencyMs:data.maxInputLatencyMs,sections:data.sections,
           renderer:renderer&&renderer.mode,convertedPixels:convertedPixels,skippedPixels:skippedPixels,
-          signatureMs:drawCount?signatureTotal/drawCount:0,conversionMs:drawCount?conversionTotal/drawCount:0};
+          signatureMs:drawCount?signatureTotal/drawCount:0,conversionMs:drawCount?conversionTotal/drawCount:0,
+          encodingMs:drawCount?encodingTotal/drawCount:0,decodingMs:drawCount?decodingTotal/drawCount:0,
+          presentationMs:drawCount?presentationTotal/drawCount:0,canvasCpuMs:drawCount?canvasCpuTotal/drawCount:0,
+          presentationPending:presentationPending};
         state.performance=timing;lastPresented=state.frames;lastPresentationTime=measuredAt;drawTotal=drawMax=drawCount=0;
         convertedPixels=skippedPixels=signatureTotal=conversionTotal=0;
+        encodingTotal=decodingTotal=presentationTotal=canvasCpuTotal=0;
         if(!inputBlocked)$('runtime-status').textContent=presentFps.toFixed(1)+' FPS / 20 · '+state.mode;
         metricReports++;if(metricReports<=3||Date.now()-lastMetricReport>=15000){lastMetricReport=Date.now();report('metrics',timing);}break;
-      case 'exit':ready=false;state.loaded=false;blockInputs(false);transport.stop();audio.stop();$('runtime-status').textContent='Game closed · return to Library';report('exit',{recentInputs:recentInputs});break;
+      case 'exit':ready=false;state.loaded=false;stopRendering();blockInputs(false);transport.stop();audio.stop();$('runtime-status').textContent='Game closed · return to Library';report('exit',{recentInputs:recentInputs});break;
       }
     }catch(e){error(e.message);}
   }
@@ -177,14 +222,22 @@
   function start(){
     if(started)return;started=true;$('start').disabled=true;audio=window.createDiabloAudio();
     if(benchmark){$('sound').disabled=true;$('sound').textContent='Sound off';$('sound').setAttribute('aria-pressed','false');}
-    if(window.createDiabloRenderer){renderer=window.createDiabloRenderer(canvas,{preferWebGL:true,onCapabilities:function(value){state.capabilities=value;state.renderer=value.selected;if(state.engineSha256)report('capabilities',{capabilities:value});}});state.renderer=renderer.mode;state.capabilities=renderer.capabilities;}
     if(!context){error('Canvas 2D is unavailable in this browser.');return;}
+    try{
+      if(window.createDiabloRenderer){renderer=window.createDiabloRenderer(canvas,{preferWebGL:rendererChoice==='auto',preferBMP:rendererChoice==='bmp',onCapabilities:function(value){state.capabilities=value;state.renderer=value.selected;if(state.engineSha256)report('capabilities',{capabilities:value});}});state.renderer=renderer.mode;state.capabilities=renderer.capabilities;}
+    }catch(e){error(e.message);return;}
     loading('Connecting to your Mac…',0);
     Portal.session().then(function(value){token=value;return request('GET','/api/status');}).then(function(buffer){
       var status=json(buffer);if(!status.engineReady||!status.dataReady)throw new Error('The Mac setup is incomplete. Build the engine and prepare shareware data, then reload.');
-      return Promise.all([chooseTransport().then(function(value){transport=value;if(state.error)transport.stop();return value;}),request('GET','/game-data/spawn.mpq',null,{},function(e){loading('Loading shareware from your Mac…',e.lengthComputable?Math.round(e.loaded/e.total*85):10);}),benchmark?Promise.resolve(null):request('GET','/api/saves',null,{'X-Portal-Token':token}),request('GET','/engine/build.json')]);
+      return Promise.all([chooseTransport().then(function(value){transport=value;if(state.error)transport.stop();return value;}),request('GET','/game-data/spawn.mpq',null,{},function(e){loading('Loading shareware from your Mac…',e.lengthComputable?Math.round(e.loaded/e.total*85):10);}),benchmark?Promise.resolve(null):request('GET','/api/saves',null,{'X-Portal-Token':token}),request('GET','/engine/build.json'),new Promise(function(resolve,reject){if(renderer&&renderer.prepare)renderer.prepare(function(failure){if(failure)reject(failure);else resolve();});else resolve();}),request('GET','/assets/runtime.json'),pageRuntime]);
     }).then(function(values){
       transport=values[0];var archive=values[1];state.engineSha256=json(values[3]).sha256;
+      var runtime=values[6],currentRuntime=json(values[5]);
+      if(runtime.error)throw new Error(runtime.error);
+      if(runtime.revisionSha256!==currentRuntime.revisionSha256)throw new Error('The game code changed after this page opened. Reload the game to use a matching frontend revision.');
+      if(runtime.engineSha256!==state.engineSha256)throw new Error('The engine changed while loading. Reload the game to use a matching runtime revision.');
+      state.frontendSha256=runtime.frontendSha256;state.revisionSha256=runtime.revisionSha256;
+      if(!/^[a-f0-9]{64}$/.test(state.frontendSha256||'')||!/^[a-f0-9]{64}$/.test(state.revisionSha256||''))throw new Error('The Mac runtime manifest is incomplete. Rebuild it and reload.');
       if(renderer)report('capabilities',{capabilities:renderer.capabilities});
       if(archive.byteLength!==25830791)throw new Error('The shareware archive has an unexpected size.');
       var signature=new Uint8Array(archive,0,4);if(signature[0]!==77||signature[1]!==80||signature[2]!==81||signature[3]!==26)throw new Error('The shareware archive is not valid MPQ data.');
@@ -221,7 +274,8 @@
   });
   $('game-text').addEventListener('input',function(){event('text',[this.value.replace(/[^\x20-\x7e]/g,''),0]);});
   $('text-cancel').addEventListener('click',function(){event('text',[$('game-text').value,1]);$('text-entry').hidden=true;tapKey(27);canvas.focus();});
-  $('leave').addEventListener('click',function(e){if(saving||Object.keys(pending).length){e.preventDefault();flush();$('save-status').textContent='Wait for saves to finish, then return to Library.';return;}releaseInputs();if(transport)transport.stop();if(audio)audio.stop();});
+  $('leave').addEventListener('click',function(e){if(saving||Object.keys(pending).length){e.preventDefault();flush();$('save-status').textContent='Wait for saves to finish, then return to Library.';return;}releaseInputs();stopRendering();if(transport)transport.stop();if(audio)audio.stop();});
+  window.addEventListener('pagehide',function(){releaseInputs();stopRendering();if(transport)transport.stop();if(audio)audio.stop();});
   window.addEventListener('beforeunload',function(e){if(saving||Object.keys(pending).length){e.preventDefault();e.returnValue='Saves are pending.';}});
   var oldButtons=[],lastPadTime=0;
   function pollPad(time){

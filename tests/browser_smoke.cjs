@@ -3,18 +3,24 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const {spawn} = require('child_process');
+const {spawn,spawnSync} = require('child_process');
 const assert = require('assert/strict');
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const root = path.resolve(__dirname, '..');
 const gpuEnabled=process.env.SMOKE_GPU==='1';
-const artifactDir = path.join(root,'data','qa',gpuEnabled?'gpu-smoke':'.');
+const bmpEnabled=process.env.SMOKE_BMP==='1';
+assert(!(gpuEnabled&&bmpEnabled),'choose one renderer per smoke run');
+const rendererQuery=bmpEnabled?'&renderer=bmp':'';
+const artifactDir = path.join(root,'data','qa',bmpEnabled?'bmp-smoke':gpuEnabled?'gpu-smoke':'.');
 const temp = fs.mkdtempSync(path.join(os.tmpdir(),'switch-arcade-browser-'));
 fs.mkdirSync(artifactDir,{recursive:true});
 fs.cpSync(path.join(root,'web'),path.join(temp,'web'),{recursive:true});
 fs.mkdirSync(path.join(temp,'data','assets'),{recursive:true});
 fs.copyFileSync(path.join(root,'data','assets','spawn.mpq'),path.join(temp,'data','assets','spawn.mpq'));
+const identity=spawnSync(process.env.PYTHON||'python3',[path.join(root,'scripts','build_runtime.py'),'--root',temp],{encoding:'utf8'});
+assert.equal(identity.status,0,identity.stderr);
 const build=JSON.parse(fs.readFileSync(path.join(temp,'web','engine','build.json'),'utf8'));
+const runtime=JSON.parse(fs.readFileSync(path.join(temp,'web','assets','runtime.json'),'utf8'));
 assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(temp,'web','engine','DiabloSpawn.js'))).digest('hex'),build.sha256,'manifest must identify the actual tested engine');
 const server = spawn(process.env.PYTHON || 'python3',[path.join(root,'server','portal.py'),'--root',temp,'--host','127.0.0.1','--port','8091'],{stdio:['ignore','pipe','pipe']});
 let browser;
@@ -26,7 +32,7 @@ const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   browser=await chromium.launch({channel:'chrome',headless:true,args:gpuEnabled?['--enable-unsafe-swiftshader']:[]});
   const context=await browser.newContext({viewport:{width:1280,height:900}});
   await context.route('**/js/diablo-renderer.js',route=>route.fulfill({contentType:'application/javascript',body:fs.readFileSync(path.join(temp,'web/js/diablo-renderer.js'),'utf8')+`
-;(function(){var factory=window.createDiabloRenderer;window.__testRendererFrames=[];window.createDiabloRenderer=function(canvas,options){var renderer=factory(canvas,options),draw=renderer.draw;renderer.draw=function(batch){var began=performance.now(),result=draw(batch);window.__testRendererFrames.push({phase:window.diabloStatus.phase||'menu',milliseconds:performance.now()-began,paletteChanged:result.paletteChanged,convertedPixels:result.convertedPixels,skippedPixels:result.skippedPixels});if(window.__testRendererFrames.length>1000)window.__testRendererFrames.shift();return result;};return renderer;};}());`}));
+;(function(){var factory=window.createDiabloRenderer;window.__testRendererFrames=[];window.createDiabloRenderer=function(canvas,options){var renderer=factory(canvas,options),present=renderer.present,draw=renderer.draw;function record(result,began){window.__testRendererFrames.push({phase:window.diabloStatus.phase||'menu',milliseconds:performance.now()-began,paletteChanged:result.paletteChanged,convertedPixels:result.convertedPixels,skippedPixels:result.skippedPixels,mode:result.mode,encodeMs:result.encodeMs,decodeMs:result.decodeMs});if(window.__testRendererFrames.length>1000)window.__testRendererFrames.shift();}if(present){renderer.present=function(batch,done){var began=performance.now();return present(batch,function(error,result){if(!error)record(result,began);done(error,result);});};}else{renderer.draw=function(batch){var began=performance.now(),result=draw(batch);record(result,began);return result;};}return renderer;};}());`}));
   await context.addInitScript(({gpuEnabled})=>{
     window.WebAssembly=undefined;window.SharedArrayBuffer=undefined;window.TextDecoder=undefined;
     const original=HTMLCanvasElement.prototype.getContext;
@@ -51,7 +57,7 @@ const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   const page=await context.newPage(), errors=[], requests=[], manifestResponses=[];
   page.on('pageerror',error=>errors.push(error.message));page.on('request',request=>requests.push(request.url()));
   page.on('response',response=>{if(response.url().endsWith('/engine/build.json'))manifestResponses.push(response.status());});
-  await page.goto('http://127.0.0.1:8091/play/diablo?compat=1');
+  await page.goto('http://127.0.0.1:8091/play/diablo?compat=1'+rendererQuery);
   await page.getByRole('button',{name:'Play Diablo',exact:true}).click();
   await page.waitForFunction(()=>window.diabloStatus.loaded||window.diabloStatus.error,{},{timeout:60000});
   assert.equal(await page.evaluate(()=>window.diabloStatus.error),null);
@@ -127,9 +133,10 @@ const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   result.inGameLoad=inGameLoad;
   result.browserVersion=browser.version();
   result.gpuEnabled=gpuEnabled;
+  result.bmpEnabled=bmpEnabled;
   result.rendererFrames=await page.evaluate(()=>window.__testRendererFrames);
   result.characterLoading={blockedState,blockedInputMessages,completedState:await page.evaluate(()=>window.diabloStatus)};
-  await page.goto('http://127.0.0.1:8091/play/diablo?compat=1&main=1');
+  await page.goto('http://127.0.0.1:8091/play/diablo?compat=1&main=1'+rendererQuery);
   await page.getByRole('button',{name:'Play Diablo',exact:true}).click();
   await page.waitForFunction(()=>window.diabloStatus.loaded||window.diabloStatus.error,{},{timeout:60000});
   assert.equal(await page.evaluate(()=>window.diabloStatus.error),null);
@@ -149,7 +156,7 @@ const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   const archiveRoute='**/game-data/spawn.mpq';
   let abortedArchives=0;
   await page.route(archiveRoute,route=>{abortedArchives++;return route.abort('failed');});
-  await page.goto('http://127.0.0.1:8091/play/diablo?compat=1');
+  await page.goto('http://127.0.0.1:8091/play/diablo?compat=1'+rendererQuery);
   await page.getByRole('button',{name:'Play Diablo',exact:true}).click();
   await page.locator('#failure').waitFor({state:'visible'});
   await page.waitForFunction(()=>window.diabloStatus.error!==null);
@@ -177,14 +184,17 @@ const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   result.failureRecovery={abortedArchives,failedState,recoveredState:await page.evaluate(()=>window.diabloStatus)};
   for(const state of [result.state,result.restoredMain,result.failureRecovery.recoveredState]){
     assert.equal(state.engineSha256,build.sha256);
+    assert.equal(state.frontendSha256,runtime.frontendSha256);
+    assert.equal(state.revisionSha256,runtime.revisionSha256);
     assert.equal(state.capabilities.canvas2d.status,'passed');
-    if(gpuEnabled){assert.match(state.renderer,/^webgl[12]-indexed$/);assert.equal(state.capabilities[state.renderer.split('-')[0]].paletteReadback,true);}
+    if(bmpEnabled){assert.equal(state.renderer,'bmp-indexed');assert.equal(state.capabilities.bmp.status,'passed');}
+    else if(gpuEnabled){assert.match(state.renderer,/^webgl[12]-indexed$/);assert.equal(state.capabilities[state.renderer.split('-')[0]].paletteReadback,true);}
     else{assert.equal(state.renderer,'canvas2d-indexed');assert.equal(state.capabilities.webgl1.status,'unavailable');assert.equal(state.capabilities.webgl2.status,'unavailable');}
   }
   const reports=fs.readFileSync(path.join(temp,'data','diagnostics.jsonl'),'utf8').trim().split('\n').map(line=>JSON.parse(line).payload).filter(payload=>payload.kind==='game');
   const gameReports=reports.filter(payload=>['loaded','first-frame','metrics'].includes(payload.event));
   assert(gameReports.length>0,'game build must be recorded in persisted diagnostics');
-  for(const report of gameReports){assert.equal(report.engineSha256,build.sha256);assert.equal(report.renderProtocol,'bounded-indexed-v2');}
+  for(const report of gameReports){assert.equal(report.engineSha256,build.sha256);assert.equal(report.frontendSha256,runtime.frontendSha256);assert.equal(report.revisionSha256,runtime.revisionSha256);assert.equal(report.renderProtocol,'bounded-indexed-v2');}
   const reportedModes=[...new Set(gameReports.filter(report=>report.event==='loaded').map(report=>report.mode))];
   assert(reportedModes.includes('JavaScript · worker'));assert(reportedModes.includes('JavaScript · main thread'));
   assert(manifestResponses.length>=3,'each successful startup must fetch build metadata');

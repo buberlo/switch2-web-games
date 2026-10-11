@@ -12,26 +12,29 @@ remains gated on the complete physical play session below.
 | Compiler | Emscripten 3.1.74 |
 | Output | JavaScript, full wrapper transpiled and Acorn-checked as ES5 |
 | Engine file size | 2,044,825 bytes |
-| Engine SHA-256 | `ef1a9cd3ac35b35941b62d069d5dbd6d62574756cf3e6ca8771d746c3c8cc37e` |
-| Source adaptations | Skip startup movies; native memory copies/fills; cached UI and town tile spans; indexed output; silent audio loading; complete loading and exit phase hooks |
+| Engine SHA-256 | `e2c23cbdbfadc4b27301300df3837426328eddc232cf07bfd6225d1b0818c357` |
+| Frontend SHA-256 | `c95f9de9cdfc2fdb65677214a1228a674056a64accf7b79e2c3cce7e90e43301` |
+| Combined revision SHA-256 | `e3189ccb6f2431c5db5f8bcaa8297e4762d7f494c6ede0a8bee4f6cf5061c3b8` |
+| Source adaptations | Skip startup movies; native memory copies/fills; cached UI and resolved solid town/dungeon tile spans; indexed output; silent audio loading; loading and exit phase hooks |
 | Initial / maximum heap | 128 / 256 MiB; archive and browser buffers are additional |
 | Shareware archive | `spawn.mpq`, 25,830,791 bytes, `MPQ\x1a` signature |
 | Archive SHA-256 | `21d125650291d6099a4a49e325374add8fbc3ac17f97d64fac83bbdd3364f28f` |
-| Rendering | Tested indexed WebGL palette renderer, otherwise Canvas 2D; 640×480, dirty rectangles, CSS scaling |
+| Rendering | Default verified WebGL or Canvas 2D; experimental `renderer=bmp` native indexed image decoding; 640×480 with CSS scaling |
 | Simulation target | Original 20 Hz loop |
 
-Full generated provenance and source patch hashes are in `web/engine/build.json`.
+Full generated provenance and source patch hashes are in `web/engine/build.json`;
+`web/assets/runtime.json` records relative frontend paths and their hashes.
 Engine output and game data are ignored by Git and reproducible with the setup
 commands in the README. The exact optimized build above awaits physical retest;
 earlier console runs used the hashes recorded below.
 
 ## Local results
 
-- The publication snapshot passed 46 Python tests, and the current engine plus
-  Canvas renderer passed the complete desktop gameplay/save/reload suite in
-  both Worker and main-thread modes. The optional GPU rendering path passed
-  that suite separately. Neither desktop run qualifies physical Switch speed.
-- The current compiled engine produced 120 valid indexed menu frames in
+- The current pass passed **49 Python tests in 6.217 seconds**. Canvas and native
+  BMP passed the complete desktop gameplay/save/reload suite in Worker and
+  main-thread modes; the optional GPU path passed separately. These runs do not
+  qualify physical Switch speed. Details of this pass are recorded below.
+- The current compiled engine passed 686-frame indexed cathedral replays in
   both worker-shaped and main-thread-shaped VM tests. WebAssembly, BigInt,
   SharedArrayBuffer, Worker, OffscreenCanvas and IndexedDB were absent from those
   VM environments. This checks engine execution, not physical gameplay.
@@ -84,11 +87,15 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 node scripts/check_engine.cjs
 node tests/test_frame_protocol.cjs
 node tests/test_input_protocol.cjs
+node tests/test_presentation_protocol.cjs
 node tests/browser_smoke.cjs
 node tests/test_diagnostics.cjs
 node tests/test_renderer.cjs
+node tests/test_native_renderer.cjs
 node tests/test_benchmark.cjs
 SMOKE_GPU=1 node tests/browser_smoke.cjs
+SMOKE_BMP=1 node tests/browser_smoke.cjs
+python3 scripts/build_runtime.py --check
 ```
 
 Browser tests require Playwright and Google Chrome; see the README for module
@@ -300,7 +307,7 @@ written by the speed test. These stationary probes do not qualify dungeon
 traversal, combat, potion use or ten-minute gameplay. Evidence is retained in
 `data/qa/physical-b431.json`.
 
-### Current revision — `ef1a…` town cache and adaptive Canvas
+### Town cache and adaptive Canvas — historical `ef1a…`
 
 Native town tile spans reduced paired no-JIT core mean from 12.9 to 4.7 ms and
 median from 12.9 to 4.1 ms. All 283 frames matched through zoom, movement,
@@ -318,9 +325,103 @@ palettes, mixed RGBA/indexed frames, text, detached buffers and GPU context loss
 The final engine also passed the complete desktop Canvas and WebGL gameplay
 suites, including the separate in-game Load path and page/main-thread restore.
 The WebGL test can use Chrome's software driver; it is API/pixel correctness
-evidence, not proof of hardware acceleration. Current-build physical FPS is
-pending. Evidence is under `data/qa/engine-performance/terrain/`,
+evidence, not proof of hardware acceleration. Evidence is under
+`data/qa/engine-performance/terrain/`,
 `data/qa/renderer-prototype/` and the browser smoke artifacts.
+
+The subsequent physical normal-game session measured a steady menu near 20 FPS
+and town samples of **8.44 / 12.28 presented FPS**. Town engine rate was
+15.91 / 17.64 Hz with 62.25 / 56.17 ms ticks; Canvas cost was 60.82 / 34.36 ms,
+including 52.88 / 26.72 ms of palette conversion. The player entered town and
+sent inputs, then selected game quit. This identifies conversion as a material
+remaining cost, but does not establish dungeon combat or ten-minute acceptance.
+WebGL still returned no context. Reports were received at 08:41 UTC.
+
+### Native BMP and solid dungeon pass — `e2c23…`
+
+The opt-in BMP renderer assembles an uncompressed 8-bit image with a 256-entry
+palette and DWORD-padded rows. Negative height is tried first for top-down
+orientation, with bottom-up compatibility. The format follows Microsoft's
+[BITMAPINFOHEADER documentation](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader).
+An actual 257×2 decode/readback verifies all palette entries, opaque alpha,
+orientation and odd-width padding before selection. This uses native browser
+image decoding; it does not establish GPU acceleration or Switch support.
+
+`renderer.present(batch, done)` retains input data before decoding and completes
+once after Canvas presentation. Only then does the page count the frame and
+return its transferred buffer. The existing host coalesces dirty updates while
+one frame is in transit. There is at most one Image and object URL. Timeout or
+error draws the retained frame with Canvas and disables native decoding for
+the session. Mixed RGBA frames use Canvas until the complete surface is indexed
+again. Palette changes, text removal, stale expansion caches and late callbacks
+are covered by tests.
+
+Twenty native renderer cases passed in desktop Chrome with JIT, WebAssembly
+and WebGL disabled. They include all colors/padding/orientation, full 640×480
+frames, detached buffers, palette-only changes, mixed formats, mutation of
+borrowed text, bottom-up fallback, decode errors, one-second timeout and
+cancellation. Thirty object URLs were created and revoked, with a maximum of
+one live URL. The thirteen existing renderer cases also passed, including GPU
+pixel equivalence and context loss. Frame, input and new presentation protocol
+tests passed, including exactly-once acknowledgement and rejection of a welcome
+page whose published frontend changed before Start. All nine production scripts
+parse as ES5. Evidence is in `data/qa/native-renderer/` and
+`data/qa/performance-pass/`.
+
+Patch `0007-native-solid-terrain.patch` was appended without altering earlier
+patches. It admits the original renderer's resolved solid mask only when there
+is no light translation table and the tile is not fully dark. Clipping and
+masked, table-translated and fully-dark exclusions remain intact, as do the
+2,048-entry / 2 MiB cache
+limits and level/teardown invalidation. Dungeon black fills are unchanged. No
+private level-jump or debug engine exports are present. `--legacy-dungeon-terrain`
+keeps the town accelerator for matched baseline builds.
+
+Matched baseline `e532ae69…` and candidate `e2c23…` were rebuilt from the same
+source, seven patches and compiler flags, changing only the dungeon flag.
+Ordinary Load Game replay of an isolated synthetic cathedral save produced
+**686 identical frames** in both execution contexts. Baseline-save compatibility,
+both zoom modes, inventory/character panels, walking, save/reload, six tile
+shapes, missing copy/fill methods, 283 town frames and 160 offscreen frames passed.
+The largest observed cathedral cache was 607 entries / 220,260 span bytes and
+was reset on both reloads. The fixture remains outside Git; ordinary Load does
+not prove normal physical dungeon entrance.
+
+Sequential Node `--jitless` measurements covered 120 stationary cathedral render
+calls after 30 warmup calls. The test consumer's conversion/hash work was
+excluded, along with browser presentation and transfers:
+
+| Execution shape | Baseline median | Candidate median | Reduction | Candidate p95 |
+| --- | --- | --- | --- | --- |
+| Worker | 22.8 ms | 15.5 ms | 32.0% | 20.2 ms |
+| Main thread | 20.3 ms | 15.5 ms | 23.6% | 17.6 ms |
+
+These are local CPU measurements, not console FPS or a finding about its JIT.
+They supersede the earlier provisional dungeon comparison. Full local evidence
+is in `data/qa/performance-pass/engine/summary.json`; the preceding served engine
+and metadata are retained in `data/qa/performance-pass/rollback/`.
+The publishable measurement summary is in
+[`measurements/2026-10-11-local.json`](measurements/2026-10-11-local.json).
+
+Separate frontend and combined revision hashes are generated after builds and
+frontend edits. The speed test detects frontend-only changes, restarts safely
+and reports encoding, decoding, presentation, CPU and input queue/latency costs
+separately. It excludes the first partial timing block of each phase. A real
+desktop test passed two complete runs and one frontend-only restart, with zero
+save API operations and byte-identical sentinel profiles. Desktop sequences
+remain around 20 presented FPS. The comparison controller passed all six ordered
+runs, unavailable-native termination and excessively late movement rejection.
+
+**Physical comparison pending:** reopen the Library's **Compare Canvas and BMP**
+entry and leave it visible without controls. It runs three ordered pairs using
+fresh temporary warriors, with identical six-second menu, twenty-second
+stationary-town and twenty-second moving-town phases. Ten walking commands use
+fixed two-second deadlines; a delay of two seconds invalidates the run rather
+than causing a burst. Reports include exact build identities, each phase's
+presented FPS, input queue/processing latency and frontend timer delay.
+Promotion requires every pair to improve stationary and moving gameplay FPS
+without correctness failures or increased input latency. BMP remains opt-in
+until that succeeds; the ten-minute manual session is still required.
 
 Existing research logs established prior portal delivery and reported missing
 WebAssembly for this applet user agent:
@@ -347,8 +448,8 @@ execution mode must be recorded separately.
 | Required action | Result |
 | --- | --- |
 | Connection Test opens the new portal | Confirmed by console requests and user |
-| Play Diablo renders and accepts input | Earlier builds rendered; `f834…` menu approximately 5 FPS; current build pending |
-| Create character | Two b431 temporary warriors reached town; latest build pending |
+| Play Diablo renders and accepts input | `ef1a…` menu near 20 FPS and town 8.44–12.28 FPS; latest build pending |
+| Create character | `b431…` temporary heroes and an `ef1a…` normal hero reached town; latest build pending |
 | Walk through town | Pending |
 | Enter dungeon | Pending |
 | Fight an enemy | Pending |
@@ -356,7 +457,7 @@ execution mode must be recorded separately.
 | Open inventory | Pending |
 | Save, reload and resume the same character | Pending |
 | Ten-minute physical session without crash or stuck input | Pending |
-| Achieved frame rate against 20 Hz target | `b431…` menu 16.47–16.67 FPS, town 9.91–10.24 FPS; latest build pending |
+| Achieved frame rate against 20 Hz target | `ef1a…` menu near 20 FPS, town 8.44–12.28 FPS; latest build pending |
 | Sound actually audible | Unconfirmed |
 
 A title screen or menu is not gameplay acceptance. If execution or input fails,

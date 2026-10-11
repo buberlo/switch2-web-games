@@ -33,7 +33,8 @@ PATCHES = [ROOT / "third_party/patches/0001-optional-skip-startup-video.patch",
            ROOT / "third_party/patches/0003-indexed-output-and-ui-span-cache.patch",
            ROOT / "third_party/patches/0004-silent-host-loading-and-exit-phases.patch",
            ROOT / "third_party/patches/0005-native-town-terrain.patch",
-           ROOT / "third_party/patches/0006-load-game-phase-lifecycle.patch"]
+           ROOT / "third_party/patches/0006-load-game-phase-lifecycle.patch",
+           ROOT / "third_party/patches/0007-native-solid-terrain.patch"]
 
 
 def fetch_source(url, digest, destination, marker):
@@ -129,7 +130,9 @@ def main():
     parser.add_argument("--legacy-blit", action="store_true",
                         help="Use the original per-pixel renderer for comparison")
     parser.add_argument("--legacy-terrain", action="store_true",
-                        help="Use original town tile decoding/black fills for comparison")
+                        help="Use original town and dungeon terrain rendering for comparison")
+    parser.add_argument("--legacy-dungeon-terrain", action="store_true",
+                        help="Keep native town terrain but use original dungeon rendering")
     parser.add_argument("--bulk-memory", dest="bulk_memory", action="store_true", default=True,
                         help="Use native typed-array memory copies/fills (default)")
     parser.add_argument("--legacy-memory", dest="bulk_memory", action="store_false",
@@ -150,6 +153,8 @@ def main():
         common.append("-DSWITCH_FAST_BLIT")
     if not args.legacy_terrain:
         common.append("-DSWITCH_FAST_TERRAIN")
+        if not args.legacy_dungeon_terrain:
+            common.append("-DSWITCH_FAST_DUNGEON_TERRAIN")
     if args.bulk_memory:
         common.append("-mbulk-memory")
     link_flags = ["--no-entry", "-O2", "-fexceptions", "-sWASM=0", "-sLEGACY_VM_SUPPORT=1",
@@ -224,9 +229,12 @@ fs.writeFileSync(filename, result.code + '\n');
                 "nativeTypedArrayBlits": not args.legacy_blit,
                 "maskedArtSpanCache": not args.legacy_blit,
                 "nativeTownTerrain": not args.legacy_terrain,
+                "nativeDungeonSolidTerrain": not args.legacy_terrain and not args.legacy_dungeon_terrain,
                 "townTerrainCache": {"maximumEntries": 2048, "maximumSpanBytes": 2097152,
                                      "sourceIdentityReset": ["FreeGameMem", "LoadLvlGFX"],
-                                     "scope": "unlit, unmasked town microtiles; other terrain uses original renderer"} if not args.legacy_terrain else None,
+                                     "scope": ("resolved solid unlit/prelit town and dungeon microtiles; masked, translated-light and fully-dark terrain uses original renderer"
+                                               if not args.legacy_dungeon_terrain else
+                                               "unlit, unmasked town microtiles; other terrain uses original renderer")} if not args.legacy_terrain else None,
                 "bulkMemoryOperations": args.bulk_memory,
                 "bulkMemoryCompatibilitySha256": hashlib.sha256((ROOT / "third_party/patches/bulk-memory-compat.js").read_bytes()).hexdigest() if args.bulk_memory else None,
                 "optionalIndexedOutput": "draw_indexed(x,y,w,h,indices,stride,paletteRGBX)",
@@ -245,6 +253,8 @@ fs.writeFileSync(filename, result.code + '\n');
     staged_public.replace(output)
     metadata_path = output.with_name("build.json") if output == OUTPUT else output.with_suffix(".build.json")
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")
+    if output == OUTPUT:
+        run([sys.executable, ROOT / "scripts/build_runtime.py"])
     print("Built", output, "(" + str(len(body)) + " bytes)", flush=True)
 
 
