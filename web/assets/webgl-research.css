@@ -1,0 +1,15 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #101820; color: #eff5f8; font: 18px/1.5 Arial, sans-serif; }
+main { max-width: 1040px; padding: 24px; margin: 0 auto; }
+h1 { font-size: 32px; margin: 12px 0; } h2 { font-size: 23px; margin-top: 0; }
+section { background: #1c2a35; padding: 20px; margin: 20px 0; border-radius: 8px; }
+a { color: #a5dfff; } .links a { display: block; padding: 12px 0; }
+label { display: block; margin: 12px 0; } input, select, textarea, button, .button { font: inherit; }
+input[type=text], select, textarea { display: block; width: 100%; max-width: 760px; padding: 12px; border: 1px solid #607687; border-radius: 4px; background: #f5f8fa; color: #101820; }
+.check input { width: 24px; height: 24px; vertical-align: middle; }
+button, .button { display: inline-block; padding: 14px 20px; margin: 8px 8px 8px 0; border: 0; border-radius: 5px; background: #b1e2ff; color: #101820; text-decoration: none; min-height: 52px; }
+button:disabled { background: #52616b; color: #d4dde4; } [hidden] { display: none !important; }
+.detail { font-size: 15px; overflow-wrap: break-word; } #status, #report-status { font-weight: bold; }
+#probe-surface { max-width: 640px; width: 100%; min-height: 4px; background: #080c10; }
+#probe-surface canvas { width: 100%; height: auto; display: block; } #case-results { padding-left: 25px; font-size: 16px; }
+#results-json { font: 13px/1.4 monospace; max-width: none; } textarea { overflow: auto; }

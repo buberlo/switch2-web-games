@@ -7,6 +7,8 @@ data/
 web/engine/*
 !web/engine/.gitkeep
 web/assets/runtime.json
+web/assets/webgl-research-config.js
+.wrangler/
 node_modules/
 test-results/
 playwright-report/

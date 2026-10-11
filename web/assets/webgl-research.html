@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Switch 2 WebGL research</title>
+  <link rel="stylesheet" href="/assets/webgl-research.css">
+</head>
+<body>
+  <main>
+    <a id="library-link" href="/portal">Return to library</a>
+    <h1>Switch 2 WebGL research</h1>
+    <p>This small test checks whether this browser can create and use a WebGL context. A working context alone does not prove hardware acceleration.</p>
+    <p id="environment" class="detail"></p>
+    <section id="setup">
+      <h2>Confirm this session</h2>
+      <label>System version <input id="firmware" type="text" value="23.0.1" maxlength="32" autocomplete="off"></label>
+      <label class="check"><input id="firmware-confirmed" type="checkbox"> I checked this version in System Settings → System</label>
+      <label>Console mode <select id="console-mode"><option value="">Choose mode</option><option value="handheld">Handheld</option><option value="docked">Docked</option></select></label>
+      <label>Fresh applet opening <select id="opening"><option value="1">First opening</option><option value="2">Second opening</option><option value="3">Third opening / success verification</option></select></label>
+      <button id="start" type="button">Start automatic checks</button>
+    </section>
+    <section>
+      <h2>Test progress</h2>
+      <p id="status" role="status">Confirm the session, then start.</p>
+      <button id="trusted-test" type="button" disabled>Tap to run the next gesture check</button>
+      <button id="stop" type="button" disabled>Stop test</button>
+      <a id="resume" class="button" hidden>Reload and continue with retained results</a>
+      <div id="probe-surface" aria-label="WebGL test canvas"></div>
+      <ol id="case-results"></ol>
+      <p id="report-status" role="status"></p>
+      <button id="save-report" type="button" disabled>Retry saving results on the Mac</button>
+    </section>
+    <section>
+      <h2>Compare browser origins</h2>
+      <p>Repeat after two fresh Connection Test openings. Use the same system version and mode for each origin. If a link cannot open, record it as unreachable; that is not a failed WebGL test.</p>
+      <label>Mac page for returning results <input id="lan-return" type="text" maxlength="200" autocomplete="off" placeholder="http://192.168.x.x/assets/webgl-research.html"></label>
+      <p id="navigation-status" class="detail"></p>
+      <div class="links"><a id="lan-link" hidden>Open direct LAN test</a><a id="captive-link" hidden>Open captive hostname test</a><a id="https-link" hidden>Open HTTPS test</a><a id="return-results" hidden>Return results to the Mac</a></div>
+      <label>Unreachable origin <select id="unreachable-origin"><option value="https">HTTPS test</option><option value="lan">Direct LAN test</option><option value="captive">Captive hostname test</option></select></label>
+      <button id="record-unreachable" type="button">Record that this origin could not open</button>
+    </section>
+    <section id="import-section" hidden>
+      <h2>Returned HTTPS report</h2>
+      <p>This report came from the URL fragment. Review the original origin and results below before saving it locally.</p>
+      <p id="import-summary"></p>
+      <button id="submit-import" type="button">Save this returned report on the Mac</button>
+    </section>
+    <section>
+      <h2>Readable results</h2>
+      <p>Keep this page open until the Mac confirms receipt. If returning fails or the report is too large for a link, copy the full text below. No browser storage is required.</p>
+      <textarea id="results-json" readonly rows="18" aria-label="Complete report JSON"></textarea>
+      <label>Paste a returned report or retained progress if its link was too long <textarea id="manual-import" rows="4" maxlength="61440"></textarea></label>
+      <button id="review-import" type="button">Review returned HTTPS report</button>
+      <button id="review-resume" type="button">Review retained progress to resume</button>
+    </section>
+  </main>
+  <script src="/assets/webgl-research-config.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/webgl-probe.js"></script>
+  <script src="/js/webgl-research.js"></script>
+</body>
+</html>

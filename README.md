@@ -20,6 +20,13 @@ The broader game library follows that physical acceptance gate. See the
 [contribution guide](CONTRIBUTING.md). This is a local LAN project; publishing
 the source does not host a public game service.
 
+An isolated [WebGL research harness](docs/research/webgl.md) compares context
+creation, pixel rendering and recovery across captive, LAN and public HTTPS
+origins. Its stock Switch 2 measurements are pending; it does not change the
+game's renderer defaults. Firmware **23.0.1** is owner-confirmed. The
+[source investigation](docs/research/webgl-source.md) separates Nintendo evidence
+from upstream WebKit reference code.
+
 ## Local setup and preview
 
 Requires macOS, Python 3.9+, developer command-line tools and `dnsmasq` for the
@@ -36,6 +43,7 @@ xcode-select --install
 brew install python dnsmasq
 python3 scripts/setup_assets.py
 python3 scripts/build_engine.py
+python3 scripts/build_webgl_probe.py
 python3 server/portal.py --host 127.0.0.1 --port 8090
 ```
 
@@ -228,7 +236,7 @@ node tests/test_input_protocol.cjs
 node tests/test_presentation_protocol.cjs
 ```
 
-For browser checks, install Node.js 20.18+ and Google Chrome, then install the
+For browser checks, install Node.js 22+ and Google Chrome, then install the
 pinned development dependencies. Run browser suites one at a time because they
 use fixed local test ports. `PLAYWRIGHT_MODULE` can override the module location:
 

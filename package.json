@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "Local captive portal, compatibility probes and browser game experiments for Nintendo Switch 2",
-  "engines": {"node": ">=20.18"},
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "python3 server/portal.py --host 127.0.0.1 --port 8090",
     "test:protocol": "node tests/test_frame_protocol.cjs && node tests/test_input_protocol.cjs && node tests/test_presentation_protocol.cjs",
@@ -11,7 +13,13 @@
     "test:renderer": "node tests/test_renderer.cjs",
     "test:native-renderer": "node tests/test_native_renderer.cjs",
     "test:benchmark": "node tests/test_benchmark.cjs",
-    "test:diagnostics": "node tests/test_diagnostics.cjs"
+    "test:diagnostics": "node tests/test_diagnostics.cjs",
+    "build:webgl": "python3 scripts/build_webgl_probe.py",
+    "test:webgl": "python3 -m unittest discover -s tests -p 'test_webgl_bundle.py' && node tests/test_webgl_probe_core.cjs && node tests/test_webgl_research.cjs"
   },
-  "devDependencies": {"playwright": "1.62.1"}
+  "devDependencies": {
+    "acorn": "8.15.0",
+    "playwright": "1.62.1",
+    "wrangler": "4.149.0"
+  }
 }
