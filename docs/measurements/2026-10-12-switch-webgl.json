@@ -1,0 +1,2128 @@
+{
+  "schemaVersion": 1,
+  "recordedDate": "2026-10-12",
+  "timezone": "Asia/Makassar",
+  "probeRevision": "14c857cd751d10d333e241ae742210702e8e5d7ae0467fcf68f89ddb64f4fc5b",
+  "provenance": "Sanitized latest authenticated LAN snapshots per run; transport user agents matched the Switch applet. Owner reports all checks null.",
+  "openingEvidence": "Opening number and handheld mode were selected by the owner; applet closure is not independently observed.",
+  "conclusion": "No accessible WebGL context in the tested stock applet on the two tested HTTP origins. Compilation, embedding policy and backend cause remain unresolved.",
+  "measurements": [
+    {
+      "receivedAtUtc": "2026-10-11T17:16:36+00:00",
+      "receivedAtLocal": "2026-10-12T01:16:36+08:00",
+      "originClass": "captive-check-hostname",
+      "status": "gesture",
+      "metadata": {
+        "firmware": "23.0.1",
+        "firmwareConfirmed": true,
+        "mode": "handheld",
+        "opening": 1
+      },
+      "environment": {
+        "protocol": "http:",
+        "secureContext": false,
+        "publicMode": false,
+        "userAgent": "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/613.0 (KHTML, like Gecko) NF/7.0.3.12.11 NintendoBrowser/5.2.0.55481",
+        "visibility": "visible",
+        "topLevel": true,
+        "api": {
+          "webgl1": false,
+          "webgl2": false
+        }
+      },
+      "unreachable": [],
+      "cases": [
+        {
+          "id": "visible-auto-webgl-default",
+          "contextName": "webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-webgl-minimal",
+          "contextName": "webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-experimental-webgl-default",
+          "contextName": "experimental-webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-experimental-webgl-minimal",
+          "contextName": "experimental-webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-webgl2-default",
+          "contextName": "webgl2",
+          "execution": "visible-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-webgl2-minimal",
+          "contextName": "webgl2",
+          "execution": "visible-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl-default",
+          "contextName": "webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl-minimal",
+          "contextName": "webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-experimental-webgl-default",
+          "contextName": "experimental-webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-experimental-webgl-minimal",
+          "contextName": "experimental-webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl2-default",
+          "contextName": "webgl2",
+          "execution": "detached-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl2-minimal",
+          "contextName": "webgl2",
+          "execution": "detached-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-webgl-default",
+          "contextName": "webgl",
+          "execution": "trusted-tap",
+          "requestedAttributes": null,
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        }
+      ]
+    },
+    {
+      "receivedAtUtc": "2026-10-11T17:17:53+00:00",
+      "receivedAtLocal": "2026-10-12T01:17:53+08:00",
+      "originClass": "captive-check-hostname",
+      "status": "complete",
+      "metadata": {
+        "firmware": "23.0.1",
+        "firmwareConfirmed": true,
+        "mode": "handheld",
+        "opening": 1
+      },
+      "environment": {
+        "protocol": "http:",
+        "secureContext": false,
+        "publicMode": false,
+        "userAgent": "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/613.0 (KHTML, like Gecko) NF/7.0.3.12.11 NintendoBrowser/5.2.0.55481",
+        "visibility": "visible",
+        "topLevel": true,
+        "api": {
+          "webgl1": false,
+          "webgl2": false
+        }
+      },
+      "unreachable": [
+        {
+          "target": "https",
+          "observedAt": "2026-10-11T17:17:51.504Z",
+          "reportedByUser": true
+        }
+      ],
+      "cases": [
+        {
+          "id": "visible-auto-webgl-default",
+          "contextName": "webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-webgl-minimal",
+          "contextName": "webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-experimental-webgl-default",
+          "contextName": "experimental-webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-experimental-webgl-minimal",
+          "contextName": "experimental-webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-webgl2-default",
+          "contextName": "webgl2",
+          "execution": "visible-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-webgl2-minimal",
+          "contextName": "webgl2",
+          "execution": "visible-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 1,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl-default",
+          "contextName": "webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl-minimal",
+          "contextName": "webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-experimental-webgl-default",
+          "contextName": "experimental-webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-experimental-webgl-minimal",
+          "contextName": "experimental-webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl2-default",
+          "contextName": "webgl2",
+          "execution": "detached-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl2-minimal",
+          "contextName": "webgl2",
+          "execution": "detached-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-webgl-default",
+          "contextName": "webgl",
+          "execution": "trusted-tap",
+          "requestedAttributes": null,
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-webgl-minimal",
+          "contextName": "webgl",
+          "execution": "trusted-tap",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-experimental-webgl-default",
+          "contextName": "experimental-webgl",
+          "execution": "trusted-tap",
+          "requestedAttributes": null,
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-experimental-webgl-minimal",
+          "contextName": "experimental-webgl",
+          "execution": "trusted-tap",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-webgl2-default",
+          "contextName": "webgl2",
+          "execution": "trusted-tap",
+          "requestedAttributes": null,
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-webgl2-minimal",
+          "contextName": "webgl2",
+          "execution": "trusted-tap",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        }
+      ]
+    },
+    {
+      "receivedAtUtc": "2026-10-11T17:19:27+00:00",
+      "receivedAtLocal": "2026-10-12T01:19:27+08:00",
+      "originClass": "direct-lan",
+      "status": "complete",
+      "metadata": {
+        "firmware": "23.0.1",
+        "firmwareConfirmed": true,
+        "mode": "handheld",
+        "opening": 1
+      },
+      "environment": {
+        "protocol": "http:",
+        "secureContext": false,
+        "publicMode": false,
+        "userAgent": "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/613.0 (KHTML, like Gecko) NF/7.0.3.12.11 NintendoBrowser/5.2.0.55481",
+        "visibility": "visible",
+        "topLevel": true,
+        "api": {
+          "webgl1": false,
+          "webgl2": false
+        }
+      },
+      "unreachable": [],
+      "cases": [
+        {
+          "id": "visible-auto-webgl-default",
+          "contextName": "webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0.999999999998181,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-webgl-minimal",
+          "contextName": "webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-experimental-webgl-default",
+          "contextName": "experimental-webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-experimental-webgl-minimal",
+          "contextName": "experimental-webgl",
+          "execution": "visible-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-webgl2-default",
+          "contextName": "webgl2",
+          "execution": "visible-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "visible-auto-webgl2-minimal",
+          "contextName": "webgl2",
+          "execution": "visible-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl-default",
+          "contextName": "webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl-minimal",
+          "contextName": "webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-experimental-webgl-default",
+          "contextName": "experimental-webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-experimental-webgl-minimal",
+          "contextName": "experimental-webgl",
+          "execution": "detached-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl2-default",
+          "contextName": "webgl2",
+          "execution": "detached-auto",
+          "requestedAttributes": null,
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "detached-auto-webgl2-minimal",
+          "contextName": "webgl2",
+          "execution": "detached-auto",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": false,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": false,
+            "inViewport": false,
+            "fullyInViewport": false,
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-webgl-default",
+          "contextName": "webgl",
+          "execution": "trusted-tap",
+          "requestedAttributes": null,
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-webgl-minimal",
+          "contextName": "webgl",
+          "execution": "trusted-tap",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-experimental-webgl-default",
+          "contextName": "experimental-webgl",
+          "execution": "trusted-tap",
+          "requestedAttributes": null,
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-experimental-webgl-minimal",
+          "contextName": "experimental-webgl",
+          "execution": "trusted-tap",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-webgl2-default",
+          "contextName": "webgl2",
+          "execution": "trusted-tap",
+          "requestedAttributes": null,
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        },
+        {
+          "id": "trusted-tap-webgl2-minimal",
+          "contextName": "webgl2",
+          "execution": "trusted-tap",
+          "requestedAttributes": {
+            "alpha": false,
+            "antialias": false,
+            "depth": false,
+            "stencil": false,
+            "preserveDrawingBuffer": false,
+            "failIfMajorPerformanceCaveat": false
+          },
+          "trustedGesture": true,
+          "visibility": "visible",
+          "userActivation": {
+            "available": false,
+            "isActive": null,
+            "hasBeenActive": null
+          },
+          "contextStatus": "null",
+          "creationMs": 0,
+          "api": {
+            "webgl1": "undefined",
+            "webgl2": "undefined"
+          },
+          "creationErrors": [],
+          "exception": null,
+          "canvasAtCreation": {
+            "attached": true,
+            "inViewport": true,
+            "fullyInViewport": true,
+            "rect": {
+              "left": 484,
+              "top": 0.16,
+              "width": 16,
+              "height": 16
+            },
+            "viewport": {
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          "requiresReload": false,
+          "cancelled": false
+        }
+      ]
+    }
+  ]
+}

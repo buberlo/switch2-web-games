@@ -22,8 +22,10 @@ the source does not host a public game service.
 
 An isolated [WebGL research harness](docs/research/webgl.md) compares context
 creation, pixel rendering and recovery across captive, LAN and public HTTPS
-origins. Its stock Switch 2 measurements are pending; it does not change the
-game's renderer defaults. Firmware **23.0.1** is owner-confirmed. The
+origins. On firmware **23.0.1**, the first handheld console comparison returned
+null for all 18 cases on both HTTP origins. HTTPS was reported unreachable;
+a second fresh applet opening remains pending. The harness does not change the
+game's renderer defaults. The
 [source investigation](docs/research/webgl-source.md) separates Nintendo evidence
 from upstream WebKit reference code.
 

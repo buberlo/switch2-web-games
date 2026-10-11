@@ -1,8 +1,9 @@
 # WebGL research validation — 2026-10-12
 
 This record separates local harness validation from physical Switch 2 evidence.
-The owner reconfirmed firmware **23.0.1**; the new matrix must also record physical
-mode and applet UA. No renderer default or gameplay acceptance gate changed.
+The owner reconfirmed firmware **23.0.1**. The first physical comparison records
+handheld mode and the Wi-Fi login applet UA. No renderer default or gameplay
+acceptance gate changed.
 
 ## Local results
 
@@ -60,9 +61,40 @@ These deployment controls are covered by the documented CLI commands and
 
 | Origin | First fresh applet opening | Second fresh applet opening |
 | --- | --- | --- |
-| Captive connection-check hostname | Pending | Pending |
-| Direct LAN address | Pending | Pending |
-| Public HTTPS control | Pending | Pending |
+| Captive connection-check hostname | 18/18 null; all six trusted taps completed | Pending |
+| Direct LAN address | 18/18 null; all six trusted taps completed | Pending |
+| Public HTTPS control | Owner recorded unreachable; no WebGL measurement | Pending |
+
+The console reports arrived at **01:17:53 and 01:19:27 on 2026-10-12**,
+Asia/Makassar (17:17:53 and 17:19:27 UTC on 2026-10-11), and match the published
+probe revision above. Both completed runs report firmware 23.0.1, handheld mode,
+opening number 1 and this exact UA:
+
+```text
+Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/613.0 (KHTML, like Gecko) NF/7.0.3.12.11 NintendoBrowser/5.2.0.55481
+```
+
+All 36 context requests returned null, with **zero exceptions and zero
+creation-error messages**. Neither WebGL constructor was exposed. Every attached
+creation canvas was fully onscreen; all detached cases were actually detached.
+Six requests per origin came directly from trusted clicks. The transient
+activation API was unavailable, so the automatic checks used the recorded
+six-second fallback delay. The page was visible and top-level. Its reported
+1920×1080 CSS viewport is retained as browser geometry; it is not used to infer
+physical mode.
+
+Opening number and handheld mode are owner-selected metadata; applet closure was
+not independently observed. An earlier incomplete captive run retained 13 null
+cases and is documented without being counted as a completed comparison. HTTPS
+unreachability was an explicit owner observation on the captive page; the error
+message and cause have not yet been supplied. There is no HTTPS WebGL result.
+
+The [sanitized measurements](../measurements/2026-10-12-switch-webgl.json) retain
+case names, requested attributes, trusted events, API exposure, geometry and
+outcomes. Private LAN addresses, transport addresses, random run identifiers and
+session data are omitted. The supported current conclusion is **“no accessible
+WebGL context in the tested stock applet on the two tested HTTP origins.”** The
+results do not distinguish compilation, embedding policy or backend failure.
 
 Do not fill a pending cell from desktop results or an unreachable origin. For
 each physical result retain the exact probe revision, observed UA, firmware,

@@ -2,17 +2,20 @@
 
 Research date: **2026-10-12** (Asia/Makassar). Scope: the stock Switch 2 browser.
 
-**Current conclusion:** five earlier Diablo capability reports returned no WebGL
-context. The reason is still unresolved. We have not obtained Nintendo's matching
-source archive, and upstream WebKit is a reference for discriminating tests, not
-evidence of Nintendo's compiled configuration.
+**Current conclusion:** the first controlled standalone comparison returned
+18/18 null contexts on both the captive hostname and direct LAN origin, including
+trusted taps. There is **no accessible WebGL context in the tested stock applet
+on those HTTP origins**. HTTPS was reported unreachable and a second fresh
+opening remains pending. The reason is still unresolved. We have not obtained
+Nintendo's matching source archive, and upstream WebKit is a reference for
+discriminating tests, not evidence of Nintendo's compiled configuration.
 
 ## Device and physical evidence
 
-The owner reconfirmed system version **23.0.1** on 2026-10-12. Handheld/docked
-state has not been confirmed. The new isolated probe must record both before
-classifying a new physical run. Firmware is owner-reported because a browser UA
-does not provide the console system version.
+The owner reconfirmed system version **23.0.1** on 2026-10-12 and selected
+**handheld** mode in both completed standalone reports. Firmware and physical
+mode are owner-reported because browser UA and CSS viewport do not establish
+them. Both new reports reproduce the exact Wi-Fi login applet UA below.
 
 The following is the exact applet UA from the existing console reports; capture
 it again on each new run rather than inferring it from the firmware:
@@ -42,6 +45,19 @@ same canvas. These results therefore do not cover the new fresh-canvas matrix.
 The probes happened before Diablo's engine initialization. Earlier general
 diagnostic probes had weaker null/exception reporting and are not included here.
 The raw log remains local; this table omits network addresses and session data.
+
+The standalone probe revision
+`14c857cd751d10d333e241ae742210702e8e5d7ae0467fcf68f89ddb64f4fc5b`
+subsequently completed the full matrix on the captive hostname and direct LAN
+origin. Each yielded 18 null returns, no exceptions and no creation-error text.
+All attached canvases were fully onscreen and all six direct trusted taps per
+origin were recorded. Neither WebGL constructor was exposed. These measurements
+exclude Diablo and its heap. Both are labeled opening 1 by the owner; they do
+not establish two independent fresh applet openings. HTTPS was explicitly marked
+unreachable, so there is no secure-origin context result. An incomplete earlier
+captive run retains 13 cases without being counted as complete.
+See [physical validation](webgl-validation.md#physical-origin-comparison) and
+[sanitized case measurements](../measurements/2026-10-12-switch-webgl.json).
 
 ## Source provenance and retrieval blocker
 
@@ -152,12 +168,12 @@ that the cited upstream mechanisms exist.
 
 | Hypothesis | Source evidence | Physical observation | Next discriminating test | Confidence | Homebrew relevance |
 | --- | --- | --- | --- | --- | --- |
-| Existing attributes or detached-canvas handling cause failure | Khronos context attributes; current renderer settings | Five small detached-canvas startup reports return null | Fresh visible/detached canvases, omitted/minimal attributes, direct trusted tap | Unresolved | An ordinary compatible setup could remove the need for deeper platform work. |
-| WebGL is excluded at compile time | Upstream `ENABLE(WEBGL)` and conditional IDL | Null results do not distinguish exclusion | Matching archive: inspect generated feature defines and build inputs, then reconcile with API exposure | Unresolved | Identifies an implementation boundary only; no method for installing a changed browser is established. |
-| The applet disables an embedding preference | Upstream runtime gate and native setter | Null results consistent with several causes | Source trace of Nintendo/NetFront initialization; compare a demonstrably different stock entry point if reachable | Unresolved | Useful configuration lead if future independently established native access exists. No such access is demonstrated here. |
-| Graphics backend initialization fails or is unavailable | Upstream graphics-client creation path | Previous reports lack creation-error messages | Capture event text/exceptions on a clean page, then inspect matching port backend | Unresolved | Porting/driver requirement, not proof of an exploitable failure. |
-| Origin or applet policy changes availability | Embedding policies may differ; Nintendo policy is not known | Historical tests do not provide a controlled origin comparison | Same revision through captive hostname, direct LAN, valid public HTTPS; two fresh openings | Unresolved | May identify a reachable stock configuration; navigation alone is not an applet switch. |
-| Game memory pressure caused initial nulls | Probes ran before game initialization | Existing tests used tiny canvases before engine heap allocation | Minimal isolated page with one retained context; bounded cleanup/reload | Weakened, not eliminated | Resource behavior only; no code-execution implication. |
+| Existing attributes or detached-canvas handling cause failure | Khronos context attributes; current renderer settings | Both HTTP origins return null for omitted/minimal attributes, onscreen/detached canvases and direct trusted taps | Repeat after an independently fresh applet opening | Weakened by the controlled matrix | An ordinary compatible setup could remove the need for deeper platform work. |
+| WebGL is excluded at compile time | Upstream `ENABLE(WEBGL)` and conditional IDL | Constructors absent and all 36 complete requests null; this does not distinguish exclusion from runtime gating | Matching archive: inspect generated feature defines and build inputs, then reconcile with API exposure | Unresolved | Identifies an implementation boundary only; no method for installing a changed browser is established. |
+| The applet disables an embedding preference | Upstream runtime gate and native setter | Missing constructors and null returns are consistent with that gate but do not prove Nintendo uses it | Source trace of Nintendo/NetFront initialization; compare a demonstrably different stock entry point if reachable | Unresolved | Useful configuration lead if future independently established native access exists. No such access is demonstrated here. |
+| Graphics backend initialization fails or is unavailable | Upstream graphics-client creation path | Controlled requests have no exception or creation-error text | Inspect matching port behavior; absent events alone do not identify the stage | Unresolved | Porting/driver requirement, not proof of an exploitable failure. |
+| Origin or applet policy changes availability | Embedding policies may differ; Nintendo policy is not known | Captive and direct LAN results match; HTTPS is recorded unreachable | Diagnose HTTPS reachability, then repeat identical revision through reachable origins in a second fresh opening | Unresolved for HTTPS and other applets | May identify a reachable stock configuration; navigation alone is not an applet switch. |
+| Game memory pressure caused initial nulls | Probes ran before game initialization | Isolated page without Diablo also returns null across both HTTP origins | Second fresh applet opening to control residual applet state | Weakened further | Resource behavior only; no code-execution implication. |
 
 ## Homebrew research ledger and stopping rule
 

@@ -12,8 +12,12 @@ or the physical gameplay acceptance gate.
   controlled fresh-applet comparisons. See the exact UA, sanitized measurements,
   provenance and hypothesis table in [the source investigation](webgl-source.md).
 - The new isolated matrix passes desktop positive and fault-injection tests.
-  New physical origin comparisons remain pending. Desktop SwiftShader drawing is
-  harness validation, not evidence of Switch GPU access or gameplay speed.
+  The first owner-selected handheld opening returned **18/18 null contexts on
+  each HTTP origin**, including all trusted taps. HTTPS was recorded unreachable.
+  The second fresh applet opening and HTTPS failure details remain pending; see
+  [validation and physical evidence](webgl-validation.md#physical-origin-comparison).
+  Desktop SwiftShader drawing is harness validation, not evidence of Switch GPU
+  access or gameplay speed.
 - Nintendo's catalog lists Switch 2 sources for 23.0.0 or later. Retrieval is
   blocked by HTTP 403; no corresponding archive bytes or SHA-256 are claimed.
   Pinned upstream source references are explicitly approximate.
