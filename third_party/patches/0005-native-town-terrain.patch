@@ -1,0 +1,154 @@
+--- a/Source/town.cpp
++++ b/Source/town.cpp
+@@ -1,7 +1,26 @@
+ #include "diablo.h"
+ 
++#if defined(EMSCRIPTEN) && defined(SWITCH_FAST_TERRAIN)
++#include <emscripten.h>
++// Preserve the original upper stop / lower skip clipping at each diamond row.
++EM_JS(void, api_town_clear_diamond, (int dst, int end, int lower), {
++    for (var row = 0; row < 31; row++, dst -= 768) {
++        if (!lower && dst < end) return;
++        if (!lower || dst < end) {
++            var inset = row < 16 ? 30 - row * 2 : (row - 15) * 2;
++            HEAPU8.fill(0, dst + inset, dst + 64 - inset);
++        }
++    }
++});
++#endif
++
++
+ void town_clear_upper_buf(BYTE *pBuff)
+ {
++#if defined(EMSCRIPTEN) && defined(SWITCH_FAST_TERRAIN)
++	api_town_clear_diamond((int)pBuff, (int)gpBufEnd, 0);
++	return;
++#endif
+ 	/// ASSERT: assert(gpBuffer);
+ 
+ #ifdef USE_ASM
+@@ -64,6 +83,10 @@
+ 
+ void town_clear_low_buf(BYTE *pBuff)
+ {
++#if defined(EMSCRIPTEN) && defined(SWITCH_FAST_TERRAIN)
++	api_town_clear_diamond((int)pBuff, (int)gpBufEnd, 1);
++	return;
++#endif
+ 	/// ASSERT: assert(gpBuffer);
+ 
+ #ifdef USE_ASM
+--- a/Source/render.cpp
++++ b/Source/render.cpp
+@@ -1,4 +1,63 @@
+ #include "diablo.h"
++
++#if defined(EMSCRIPTEN) && defined(SWITCH_FAST_TERRAIN)
++#include <emscripten.h>
++EM_JS(void, api_reset_terrain_cache, (), {
++    Module['switchTerrainCache'] = {entries: Object.create(null), count: 0, bytes: 0};
++});
++void ResetNativeTerrainCache() { api_reset_terrain_cache(); }
++// Cache only integer source offsets and span lengths, never a heap view.
++// FreeGameMem and LoadLvlGFX invalidate source identity even if malloc later
++// reuses the same address. Cap both entry count and owned span-buffer bytes.
++EM_JS(int, api_draw_town_tile, (int dst, int src, int tile, int clipLow, int clipHigh), {
++    var cache = Module['switchTerrainCache'];
++    if (!cache) cache = Module['switchTerrainCache'] = {entries: Object.create(null), count: 0, bytes: 0};
++    var key = src + ':' + tile;
++    var spans = cache.entries[key];
++    if (!spans) {
++        if (tile < 0 || tile > 5) return 0;
++        var list = [], source = 0, row = 0, inset = 0, length = 0;
++        if (tile === 1) {
++            for (row = 0; row < 32; row++) {
++                var col = 0;
++                while (col < 32) {
++                    var code = HEAP8[src + source++];
++                    if (code === 0 || col + Math.abs(code) > 32) return 0;
++                    if (code > 0) {
++                        list.push(-row * 768 + col, source, code);
++                        source += code;
++                    }
++                    col += Math.abs(code);
++                }
++            }
++        } else {
++            var rows = tile === 2 || tile === 3 ? 31 : 32;
++            for (row = 0; row < rows; row++) {
++                inset = tile === 0 || row >= 16 && tile >= 4 ? 0 :
++                    row < 16 ? 30 - row * 2 : (row - 15) * 2;
++                length = 32 - inset;
++                if (tile === 2 || tile === 4) source += inset & 2;
++                list.push(-row * 768 + (tile === 2 || tile === 4 ? inset : 0), source, length);
++                source += length;
++                if (tile === 3 || tile === 5) source += inset & 2;
++            }
++        }
++        spans = new Int32Array(list);
++        if (cache.count >= 2048 || cache.bytes + spans.byteLength > 2097152) {
++            cache.entries = Object.create(null); cache.count = 0; cache.bytes = 0;
++        }
++        cache.entries[key] = spans; cache.count++; cache.bytes += spans.byteLength;
++    }
++    for (var i = 0; i < spans.length; i += 3) {
++        var out = dst + spans[i];
++        if (out < clipLow || out > clipHigh) continue;
++        var begin = src + spans[i + 1];
++        HEAPU8.set(HEAPU8.subarray(begin, begin + spans[i + 2]), out);
++    }
++    return 1;
++});
++#endif
++
+ 
+ #define NO_OVERDRAW
+ #define USE_SPEEDCELS
+@@ -211,6 +270,17 @@
+ //	}
+ //#endif
+ 
++#if defined(EMSCRIPTEN) && defined(SWITCH_FAST_TERRAIN)
++    // Town tiles have no light lookup or transparency mask. Keep every dungeon,
++    // masked, and lit case on the original renderer until separately verified.
++    if (leveltype == DTYPE_TOWN && light_table_index == 0 && !cel_transparency_active) {
++        BYTE *clipLow = &gpBuffer[(zoomflag ? 160 : 143) * BUFFER_WIDTH];
++        BYTE *clipHigh = &gpBuffer[(zoomflag ? 512 : 320) * BUFFER_WIDTH];
++        if (api_draw_town_tile((int)dst, (int)src, tile, (int)clipLow, (int)clipHigh))
++            return;
++    }
++#endif
++
+ 	switch(tile) {
+ 	case RT_SQUARE:
+ 		for(i = 32; i != 0; i--, dst -= BUFFER_WIDTH + 32, mask--) {
+--- a/Source/diablo.cpp
++++ b/Source/diablo.cpp
+@@ -1,4 +1,7 @@
+ #include "diablo.h"
++#if defined(EMSCRIPTEN) && defined(SWITCH_FAST_TERRAIN)
++void ResetNativeTerrainCache();
++#endif
+ #include "storm/storm.h"
+ #include "ui/diabloui.h"
+ #include "ui/event.h"
+@@ -69,6 +72,9 @@
+ 
+ void FreeGameMem()
+ {
++#if defined(EMSCRIPTEN) && defined(SWITCH_FAST_TERRAIN)
++	ResetNativeTerrainCache();
++#endif
+ 	music_stop();
+ 
+ 	MemFreeDbg(pDungeonCels);
+@@ -889,6 +895,9 @@
+ 
+ void LoadLvlGFX()
+ {
++#if defined(EMSCRIPTEN) && defined(SWITCH_FAST_TERRAIN)
++	ResetNativeTerrainCache();
++#endif
+ 	/// ASSERT: assert(! pDungeonCels);
+ 
+ 	switch (leveltype) {

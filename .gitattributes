@@ -1,0 +1,2 @@
+# Preserve patch context and original upstream line endings byte for byte.
+third_party/patches/*.patch -text -whitespace

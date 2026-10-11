@@ -1,0 +1,213 @@
+--- a/Source/dx.cpp
++++ b/Source/dx.cpp
+@@ -119,6 +119,9 @@
+ // force alpha to 255 with one 32-bit store, using the current palette per blit.
+ EM_JS(void, api_expand_palette, (int src, int dst, int width, int height,
+                                int srcSkip, int dstSkip, int palette), {
++  var profiler = self.DApi.profiler;
++  var clock = self.performance && self.performance.now ? function () { return self.performance.now(); } : Date.now;
++  var started = profiler ? clock() : 0;
+   var pixels = HEAPU32;
+   var indexed = HEAPU8;
+   var target = dst >>> 2;
+@@ -132,8 +135,23 @@
+     src += srcSkip;
+     target += targetSkip;
+   }
+-});
+-#endif
++  if (profiler) profiler("palette", clock() - started);
++});
++#endif
++// Views are borrowed only for this synchronous callback; the host copies
++// dirty rows into its own indexed framebuffer before returning.
++EM_JS(int, api_draw_indexed, (int x, int y, int width, int height, int src,
++                             int stride, int palette), {
++  if (!self.DApi.draw_indexed || width <= 0 || height <= 0) return 0;
++  var profiler = self.DApi.profiler;
++  var clock = self.performance && self.performance.now ? function () { return self.performance.now(); } : Date.now;
++  var started = profiler ? clock() : 0;
++  self.DApi.draw_indexed(x, y, width, height,
++    HEAPU8.subarray(src, src + (height - 1) * stride + width), stride,
++    HEAPU8.subarray(palette, palette + 1024));
++  if (profiler) profiler("indexedBridge", clock() - started);
++  return 1;
++});
+ EM_JS( void, api_draw_end, (), {
+   self.DApi.draw_end();
+ });
+@@ -189,6 +207,13 @@
+ 
+   src = &gpBuffer[nSrcOff];
+   dst = (BYTE *) sgpFrontBuf + nDstOff;
++
++  if (!use_offscreen && api_draw_indexed(dwX, dwY, dwWdt, dwHgt,
++                                        (int) src, BUFFER_WIDTH,
++                                        (int) system_palette)) {
++    unlock_buf(6);
++    return;
++  }
+ 
+ #ifdef SWITCH_FAST_BLIT
+   static_assert(sizeof(PALETTEENTRY) == 4, "Packed palette entries required");
+--- a/Source/ui/common.cpp
++++ b/Source/ui/common.cpp
+@@ -9,6 +9,18 @@
+ Art ArtBackground;
+ Art ArtCursor;
+ Art ArtHero;
++
++#ifdef EMSCRIPTEN
++#include <emscripten.h>
++EM_JS(void, api_engine_phase, (const char* name, int value), {
++  if (self.DApi.phase) self.DApi.phase(UTF8ToString(name), {value:value});
++});
++#endif
++void engine_phase(const char* name, int value) {
++#ifdef EMSCRIPTEN
++  api_engine_phase(name, value);
++#endif
++}
+ 
+ unsigned int fadeStart = 0;
+ 
+@@ -119,11 +131,51 @@
+ // Keep masked sprites/fonts on the upstream path below.
+ EM_JS(void, api_copy_art_rows, (int src, int dst, int width, int height,
+                               int srcStride, int dstStride), {
++  var profiler = self.DApi.profiler;
++  var clock = self.performance && self.performance.now ? function () { return self.performance.now(); } : Date.now;
++  var started = profiler ? clock() : 0;
+   for (var row = 0; row < height; row++) {
+     HEAPU8.set(HEAPU8.subarray(src, src + width), dst);
+     src += srcStride;
+     dst += dstStride;
+   }
++  if (profiler) profiler("artOpaque", clock() - started);
++});
++
++// UI font/logo art is immutable after UiInitialize. Cache its opaque spans,
++// bounded to 512 distinct frame/clip combinations, rather than testing a mask
++// for every pixel on every rendered frame.
++EM_JS(void, api_copy_masked_art_rows, (int src, int dst, int width, int height,
++                                     int srcStride, int dstStride, int mask), {
++  var profiler = self.DApi.profiler;
++  var clock = self.performance && self.performance.now ? function () { return self.performance.now(); } : Date.now;
++  var started = profiler ? clock() : 0;
++  var cache = self.DApi.__maskedArtCache;
++  if (!cache) cache = self.DApi.__maskedArtCache = {entries:{}, count:0};
++  var key = src + ":" + width + ":" + height + ":" + srcStride + ":" + dstStride + ":" + mask;
++  var runs = cache.entries[key];
++  if (!runs) {
++    var values = [], source = src;
++    for (var row = 0; row < height; row++) {
++      var end = source + width, left = source;
++      while (source < end) {
++        while (source < end && HEAPU8[source] === mask) source++;
++        var begin = source;
++        while (source < end && HEAPU8[source] !== mask) source++;
++        if (source > begin) values.push(begin, row * dstStride + begin - left, source - begin);
++      }
++      source += srcStride - width;
++    }
++    runs = new Int32Array(values);
++    if (cache.count >= 512) cache = self.DApi.__maskedArtCache = {entries:{}, count:0};
++    cache.entries[key] = runs;
++    cache.count++;
++  }
++  for (var i = 0; i < runs.length; i += 3) {
++    var begin = runs[i];
++    HEAPU8.set(HEAPU8.subarray(begin, begin + runs[i + 2]), dst + runs[i + 1]);
++  }
++  if (profiler) profiler("artMasked", clock() - started);
+ });
+ #endif
+ 
+@@ -135,14 +187,19 @@
+   }
+ 
+ #if defined(EMSCRIPTEN) && defined(SWITCH_FAST_BLIT)
+-  if (!art->masked && screenX >= 0 && screenY >= 0) {
++  if (screenX >= 0 && screenY >= 0) {
+     int width = (int) art->width;
+     if (width > drawW) width = drawW;
+     if (width > SCREEN_WIDTH - screenX) width = SCREEN_WIDTH - screenX;
+     int height = (int) art->height;
+     if (height > SCREEN_HEIGHT - screenY) height = SCREEN_HEIGHT - screenY;
+     if (width > 0 && height > 0) {
+-      api_copy_art_rows((int) src, (int) dst, width, height, art->width, BUFFER_WIDTH);
++      if (art->masked) {
++        api_copy_masked_art_rows((int) src, (int) dst, width, height,
++                                 art->width, BUFFER_WIDTH, art->mask);
++      } else {
++        api_copy_art_rows((int) src, (int) dst, width, height, art->width, BUFFER_WIDTH);
++      }
+     }
+     return;
+   }
+--- a/Source/ui/common.h
++++ b/Source/ui/common.h
+@@ -54,6 +54,7 @@
+ void LoadBackgroundArt(const char *pszFile);
+ void LoadMaskedArtFont(const char *pszFile, Art *art, int frames, int mask = 250);
+ void LoadArtFont(const char *pszFile, int size, int color);
++void engine_phase(const char* name, int value = 0);
+ void UiFadeReset();
+ void UiFadeIn(unsigned int time);
+ 
+--- a/Source/ui/workflow.cpp
++++ b/Source/ui/workflow.cpp
+@@ -62,6 +62,7 @@
+   GameStatePtr prev = GameState::current();
+   GameState::activate(select_name_dialog(hero, [hero, prev](const char* name) mutable {
+     if (name) {
++      engine_phase("hero-accepted", gbMaxPlayers);
+       strcpy(hero.name, name);
+       pfile_ui_save_create(&hero);
+       if (gbMaxPlayers == 1) {
+--- a/Source/ui/play.cpp
++++ b/Source/ui/play.cpp
+@@ -49,6 +49,7 @@
+     }
+ 
+     //nthread_ignore_mutex(TRUE);
++    engine_phase("loading-start", uMsg);
+     start_game(uMsg);
+     /// ASSERT: assert(ghMainWnd);
+     control_update_life_mana();
+@@ -63,6 +64,7 @@
+     gbGameLoopStartup = TRUE;
+     //nthread_ignore_mutex(FALSE);
+     started_ = true;
++    engine_phase("game-ready", currlevel);
+   }
+ 
+   void onDeactivate() override {
+--- a/Source/main.cpp
++++ b/Source/main.cpp
+@@ -167,6 +167,7 @@
+   nthread_loop();
+   TickCount = time;
+   if (!GameState::current()) {
++    engine_phase("engine-exit");
+     api_exit_game();
+   }
+   GameState::render(time);
+--- a/Source/interfac.cpp
++++ b/Source/interfac.cpp
+@@ -1,6 +1,7 @@
+ #include "diablo.h"
+ #include "storm/storm.h"
+ #include "trace.h"
++#include "ui/common.h"
+ 
+ void *sgpBackCel;
+ int sgdwProgress;
+@@ -16,6 +17,7 @@
+ 		sgdwProgress = 534;
+ 	if (sgpBackCel)
+ 		DrawCutscene();
++  engine_phase("loading-progress", sgdwProgress);
+ 	return (DWORD)sgdwProgress >= 534;
+ }
+ 

@@ -1,0 +1,22 @@
+--- a/Source/main.cpp
++++ b/Source/main.cpp
+@@ -48,6 +48,11 @@
+ #endif
+ 
+ GameStatePtr initial_state() {
++#ifdef SWITCH_SKIP_INTRO
++  // Captive browsers may interpret JS slowly; avoid constructing/decompressing
++  // startup video entirely and open the interactive menu immediately.
++  return get_main_menu_dialog();
++#else
+   GameStatePtr nextState = get_title_dialog();
+ 
+ #ifndef SPAWN
+@@ -66,6 +71,7 @@
+ #endif
+ 
+   return get_video_state("gendata\\logo.smk", true, false, nextState);
++#endif
+ }
+ 
+ HANDLE init_test_access(const char *mpq_path) {

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="420" viewBox="0 0 560 420" role="img" aria-labelledby="title desc">
+  <title id="title">Beneath Tristram</title><desc id="desc">Original geometric artwork: a ruined cathedral in a dark red valley, a lit doorway, and a blood-red moon.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#4f211c"/><stop offset=".58" stop-color="#281b19"/><stop offset="1" stop-color="#181512"/></linearGradient>
+    <radialGradient id="halo"><stop stop-color="#d57842" stop-opacity=".55"/><stop offset="1" stop-color="#a24725" stop-opacity="0"/></radialGradient>
+    <linearGradient id="door" x2="0" y2="1"><stop stop-color="#ffdaa0"/><stop offset=".48" stop-color="#ca7840"/><stop offset="1" stop-color="#62351e"/></linearGradient>
+    <linearGradient id="path" x2="0" y2="1"><stop stop-color="#9c6339" stop-opacity=".65"/><stop offset="1" stop-color="#9c6339" stop-opacity="0"/></linearGradient>
+    <linearGradient id="vignette" x2="0" y2="1"><stop stop-color="#17110e" stop-opacity="0"/><stop offset="1" stop-color="#17110e" stop-opacity=".9"/></linearGradient>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h560v420H0z"/>
+  <circle cx="280" cy="137" r="165" fill="url(#halo)"/>
+  <circle cx="371" cy="85" r="43" fill="#a14532"/><circle cx="359" cy="75" r="38" fill="#b85338" opacity=".28"/>
+  <path d="m0 182 56-33 24 10 39-45 46 57 23-15 60 57 44-46 19 11 41-36 42 36 32-58 52 53 42-15 30 40v222H0Z" fill="#211918"/>
+  <path d="m0 260 38-37 64 39 40-23 38 27 21-14 40 43 47-32 57 27 45-37 42 13 29-33 54 24 45-35v198H0Z" fill="#171615"/>
+  <path d="M195 317V170l30-30 7-61 9 61 13 17v-21l26-52 26 52v21l13-17 9-61 7 61 30 30v147Z" fill="#181714" stroke="#71503b" stroke-width="1"/>
+  <path d="M214 310V180l22-24 22 24v130m43 0V180l23-24 22 24v130" fill="#211d17" stroke="#4d3829" stroke-width="1"/>
+  <path d="M257 310V140l23-44 23 44v170Z" fill="#292117" stroke="#775036" stroke-width="1"/>
+  <path d="m264 137 16-30 16 30Z" fill="#4b3020"/>
+  <path d="M273 154v-12a7 7 0 0 1 14 0v12Z" fill="#aa6435"/>
+  <path d="M273 154v-12a7 7 0 0 1 14 0v12Z" fill="#efac59" opacity=".35"/>
+  <path d="M223 205v-17l13-14 13 14v17Zm87 0v-17l14-14 13 14v17Z" fill="#0e1210" stroke="#543a28"/>
+  <path d="M233 181v19m-7-8h20m76-11v19m-7-8h20" stroke="#503926"/>
+  <circle cx="280" cy="198" r="18" fill="#171612" stroke="#63432d" stroke-width="3"/>
+  <path d="m267 185 26 26m0-26-26 26m13-31v36m-18-18h36" stroke="#8a5633" stroke-width="2"/>
+  <path d="M249 318v-53c0-19 31-45 31-45s31 26 31 45v53Z" fill="#120f0c" stroke="#815234" stroke-width="4"/>
+  <path d="M260 317v-51c0-13 20-31 20-31s20 18 20 31v51Z" fill="url(#door)"/>
+  <path d="M270 318v-54l10-13 10 13v54Z" fill="#f1b967" opacity=".32"/>
+  <path d="M281 245v73" stroke="#704226" stroke-width="2"/>
+  <path d="M186 315h188v7H186zm-9 9h207v8H177z" fill="#3c2c1f" stroke="#5b3e27"/>
+  <path d="m261 321-69 99h176l-69-99Z" fill="url(#path)"/>
+  <path d="m258 329 45 1m-53 10h61m-68 11h76m-86 14h96m-108 16h122" stroke="#b8783c" stroke-opacity=".3"/>
+  <path d="M152 309v-87m-8 20 8-20 8 20m-20 13h24m230 56V215m-8 21 8-21 8 21m-21 13h27" stroke="#181814" stroke-width="5"/>
+  <path d="m27 342 52-15 22 5 12-10 55 11 22 17-33 4-39-9-49 16-42-3m366-9 41-20 40 15 28-1 38 11v37H393Z" fill="#121411"/>
+  <path d="M235 296v-13m90 13v-13" stroke="#bd8351" stroke-width="3"/>
+  <path d="M232 282q-3-8 3-12 5 7 2 12Zm90 0q-3-8 3-12 5 7 2 12Z" fill="#efb36c"/>
+  <circle cx="235" cy="277" r="25" fill="url(#halo)"/><circle cx="325" cy="277" r="25" fill="url(#halo)"/>
+  <path d="m111 91 4 1m68-47 2 1m237 70 3 1M49 65l2 1m387 144 3 1m-322 4 2 1" stroke="#bd8057" opacity=".45"/>
+  <path fill="url(#vignette)" d="M0 338h560v82H0z"/>
+  <path d="M15 15h530v390H15Z" fill="none" stroke="#b48556" stroke-opacity=".16"/>
+</svg>

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Diablo · Switch Arcade</title><link rel="stylesheet" href="/assets/diablo.css"><link rel="stylesheet" href="/assets/diablo-loading.css"></head>
+<body>
+<header><a href="/portal" id="leave">← Library</a><div><strong>DIABLO</strong><span>SHAREWARE</span></div><button id="menu" type="button">Game menu</button></header>
+<main>
+<section id="welcome" class="panel"><span class="eyebrow">THE DESCENT BEGINS</span><h1>Return to Tristram.</h1><p>Diablo shareware, running here in your browser. Tap to move, talk and fight. Your saves stay on the Mac.</p><button id="start" class="primary">Play Diablo</button><p id="load-status" role="status">Ready when you are.</p><progress id="progress" max="100" value="0" hidden></progress><a href="/diagnostics">Check browser support</a></section>
+<section id="game" hidden aria-label="Diablo game">
+<div id="viewport"><canvas id="screen" width="640" height="480" tabindex="0" aria-label="Diablo: tap to move or interact"></canvas><div id="pad-cursor" hidden aria-hidden="true"></div><div id="loading-overlay" hidden role="status"><strong>Loading Tristram…</strong><span>The game is preparing your character. Please wait.</span></div></div>
+<nav class="controls" aria-label="Game controls"><button data-key="73">Inventory</button><button data-key="67">Character</button><button data-key="49">Potion 1</button><button data-key="50">Potion 2</button><button id="spell" aria-pressed="false">Spell: off</button><button data-key="13">Confirm</button><button data-key="27">Escape</button></nav>
+<div class="telemetry"><span id="runtime-status">Starting…</span><span id="save-status" role="status">Saves ready</span><button id="retry-save" hidden>Retry saves</button><button id="sound" aria-pressed="true">Sound on</button></div>
+<p class="hint">Tap the world to move or interact. Enable Spell, then tap a target. Use Game menu to save. Controller support depends on what this browser exposes.</p>
+</section>
+<section id="failure" class="panel" hidden role="alert"><h2>The game stopped</h2><p id="error-message"></p><button id="reload">Reload game</button><a href="/diagnostics">Open diagnostics</a></section>
+<form id="text-entry" class="name-entry" hidden><label for="game-text">Enter text</label><input id="game-text" autocomplete="off" maxlength="15"><button type="submit">Confirm</button><button type="button" id="text-cancel">Cancel</button></form>
+</main>
+<script src="/js/common.js"></script><script src="/js/diablo-audio.js"></script><script src="/js/diablo-renderer.js"></script><script src="/js/diablo.js"></script><script src="/js/diablo-benchmark.js"></script>
+</body></html>

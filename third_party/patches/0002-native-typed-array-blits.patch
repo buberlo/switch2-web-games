@@ -1,0 +1,95 @@
+--- a/Source/ui/common.cpp
++++ b/Source/ui/common.cpp
+@@ -112,6 +112,21 @@
+   return mouseY_;
+ }
+ 
++#if defined(EMSCRIPTEN) && defined(SWITCH_FAST_BLIT)
++#include <emscripten.h>
++
++// TypedArray.set is a browser-native row copy, including without a JS JIT.
++// Keep masked sprites/fonts on the upstream path below.
++EM_JS(void, api_copy_art_rows, (int src, int dst, int width, int height,
++                              int srcStride, int dstStride), {
++  for (var row = 0; row < height; row++) {
++    HEAPU8.set(HEAPU8.subarray(src, src + width), dst);
++    src += srcStride;
++    dst += dstStride;
++  }
++});
++#endif
++
+ void DrawArt(int screenX, int screenY, Art *art, int nFrame, int drawW) {
+   BYTE *src = (BYTE *) art->data + (art->width * art->height * nFrame);
+   BYTE *dst = (BYTE *) gpBuffer + (SCREEN_Y + screenY) * BUFFER_WIDTH + (SCREEN_X + screenX);
+@@ -119,6 +134,20 @@
+     drawW = art->width;
+   }
+ 
++#if defined(EMSCRIPTEN) && defined(SWITCH_FAST_BLIT)
++  if (!art->masked && screenX >= 0 && screenY >= 0) {
++    int width = (int) art->width;
++    if (width > drawW) width = drawW;
++    if (width > SCREEN_WIDTH - screenX) width = SCREEN_WIDTH - screenX;
++    int height = (int) art->height;
++    if (height > SCREEN_HEIGHT - screenY) height = SCREEN_HEIGHT - screenY;
++    if (width > 0 && height > 0) {
++      api_copy_art_rows((int) src, (int) dst, width, height, art->width, BUFFER_WIDTH);
++    }
++    return;
++  }
++#endif
++
+   for (int i = 0; i < art->height && i + screenY < SCREEN_HEIGHT; i++, src += art->width, dst += BUFFER_WIDTH) {
+     for (int j = 0; j < art->width && j + screenX < SCREEN_WIDTH; j++) {
+       if (j < drawW && (!art->masked || src[j] != art->mask))
+--- a/Source/dx.cpp
++++ b/Source/dx.cpp
+@@ -114,6 +114,26 @@
+ EM_JS( void, api_draw_blit, (int x, int y, int w, int h, void* ptr), {
+   self.DApi.draw_blit(x, y, w, h, HEAPU8.subarray(ptr, ptr + w * h * 4));
+ });
++#ifdef SWITCH_FAST_BLIT
++// PALETTEENTRY is four packed bytes: red, green, blue, flags. Preserve RGB and
++// force alpha to 255 with one 32-bit store, using the current palette per blit.
++EM_JS(void, api_expand_palette, (int src, int dst, int width, int height,
++                               int srcSkip, int dstSkip, int palette), {
++  var pixels = HEAPU32;
++  var indexed = HEAPU8;
++  var target = dst >>> 2;
++  var paletteBase = palette >>> 2;
++  var targetSkip = dstSkip >>> 2;
++  for (var row = 0; row < height; row++) {
++    var end = src + width;
++    while (src < end) {
++      pixels[target++] = pixels[paletteBase + indexed[src++]] | 0xff000000;
++    }
++    src += srcSkip;
++    target += targetSkip;
++  }
++});
++#endif
+ EM_JS( void, api_draw_end, (), {
+   self.DApi.draw_end();
+ });
+@@ -170,6 +190,11 @@
+   src = &gpBuffer[nSrcOff];
+   dst = (BYTE *) sgpFrontBuf + nDstOff;
+ 
++#ifdef SWITCH_FAST_BLIT
++  static_assert(sizeof(PALETTEENTRY) == 4, "Packed palette entries required");
++  api_expand_palette((int) src, (int) dst, dwWdt, dwHgt, nSrcWdt, nDstWdt,
++                     (int) system_palette);
++#else
+   for (hgt = 0; hgt < dwHgt; hgt++, src += nSrcWdt, dst += nDstWdt) {
+     for (wdt = 0; wdt < dwWdt; wdt++) {
+       PALETTEENTRY pal = system_palette[*src++];
+@@ -180,6 +205,8 @@
+       dst += 4;
+     }
+   }
++
++#endif
+ 
+   unlock_buf(6);
+ 

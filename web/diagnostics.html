@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#131110">
+  <title>Browser check · Switch Arcade</title>
+  <link rel="stylesheet" href="/assets/portal.css">
+  <script src="/js/common.js" defer></script>
+  <script src="/js/diagnostics.js" defer></script>
+</head>
+<body>
+  <div class="site-shell diagnostics-shell">
+    <header class="site-header"><a class="brand" href="/portal"><span class="brand-mark" aria-hidden="true">◆</span><span>SWITCH <strong>ARCADE</strong></span></a><a class="back-link" href="/portal">← Back to games</a></header>
+    <main>
+      <section class="diagnostics-heading"><p class="eyebrow">BROWSER CHECK</p><h1>See what works here.</h1><p>These checks try real browser operations. A result applies to this browser session; gameplay is tested separately.</p><div class="diagnostic-actions"><button class="button button-primary" id="run-checks" type="button">Run checks again</button><span id="report-status" class="muted" role="status">Waiting for the first result.</span></div><p id="browser-context" class="context-line"></p></section>
+      <section aria-labelledby="automatic-title"><div class="section-heading"><h2 id="automatic-title">Rendering &amp; execution</h2><span>AUTOMATIC CHECKS</span></div><div class="probe-grid">
+        <article class="probe-card" id="probe-canvas2d"><div class="probe-title"><h3>Canvas 2D</h3><span class="result result-not-tested">Not tested</span></div><p class="probe-detail">Drawing and reading an actual pixel.</p></article>
+        <article class="probe-card" id="probe-worker"><div class="probe-title"><h3>Classic Worker</h3><span class="result result-not-tested">Not tested</span></div><p class="probe-detail">Sending a message to a separate worker and back.</p></article>
+        <article class="probe-card" id="probe-webgl1"><div class="probe-title"><h3>WebGL 1</h3><span class="result result-not-tested">Not tested</span></div><p class="probe-detail">Rendering a triangle and reading its pixels.</p></article>
+        <article class="probe-card" id="probe-webgl2"><div class="probe-title"><h3>WebGL 2</h3><span class="result result-not-tested">Not tested</span></div><p class="probe-detail">Rendering a triangle on an independent canvas.</p></article>
+        <article class="probe-card" id="probe-wasm"><div class="probe-title"><h3>WebAssembly</h3><span class="result result-not-tested">Not tested</span></div><p class="probe-detail">Instantiating and executing a tiny module if available.</p></article>
+        <article class="probe-card" id="probe-memory"><div class="probe-title"><h3>Memory allocation</h3><span class="result result-not-tested">Not tested</span></div><p class="probe-detail">Optional: briefly allocate a 128 MiB ArrayBuffer. Close any other game tabs first. This does not measure free RAM.</p><button class="button button-small" id="test-memory" type="button">Try 128 MiB allocation</button></article>
+      </div></section>
+      <section class="diagnostic-section" aria-labelledby="input-title"><div class="section-heading"><h2 id="input-title">Sound &amp; controls</h2><span>TRY IT YOURSELF</span></div><div class="probe-grid">
+        <article class="probe-card" id="probe-audio"><div class="probe-title"><h3>Audio</h3><span class="result result-not-tested">Not tested</span></div><p class="probe-detail">Play a quiet, short tone, then confirm whether you heard it.</p><div class="inline-actions"><button class="button button-small" id="test-audio" type="button">Play test tone</button><button class="button button-small" id="confirm-audio" type="button" hidden>I heard it</button></div></article>
+        <article class="probe-card" id="probe-gamepad"><div class="probe-title"><h3>Gamepad input</h3><span class="result result-not-tested">Not tested</span></div><p class="probe-detail">Start listening, then move a stick or press a controller button. HTTP may restrict this API; an unavailable API does not mean the controller is absent.</p><button class="button button-small" id="test-gamepad" type="button">Listen for controller input</button></article>
+      </div>
+      <div class="input-panel"><div id="input-pad" class="input-pad" tabindex="0" role="group" aria-label="Input test area: tap, drag, or focus and press a game key"><span class="input-crosshair" aria-hidden="true">+</span><strong>Tap, click or drag here</strong><span>Focus this area, then try the sticks and buttons.</span><span id="last-input" class="last-input" aria-live="polite">No input observed yet.</span></div><div class="input-results"><div id="probe-mouse" class="input-result"><h3>Mouse / cursor</h3><span class="result result-not-tested">Not tested</span><p class="probe-detail">No events observed.</p></div><div id="probe-touch" class="input-result"><h3>Touch</h3><span class="result result-not-tested">Not tested</span><p class="probe-detail">No events observed.</p></div><div id="probe-pointer" class="input-result"><h3>Pointer</h3><span class="result result-not-tested">Not tested</span><p class="probe-detail">No events observed.</p></div><div id="probe-keyboard" class="input-result"><h3>Keyboard events</h3><span class="result result-not-tested">Not tested</span><p class="probe-detail">No events observed.</p></div></div></div></section>
+      <aside class="verification-note"><span class="note-symbol" aria-hidden="true">◇</span><p>Results and event counts are saved on your Mac. Text you type is never recorded. “Not tested” means no result was observed; it is not a failure.</p><button class="button button-small" id="save-report" type="button">Save results now</button></aside>
+    </main>
+    <footer class="site-footer"><span id="report-updated">No report saved yet.</span><a href="/portal">Return to games</a></footer>
+  </div>
+  <noscript><p class="noscript">Enable JavaScript to run browser checks.</p></noscript>
+</body>
+</html>

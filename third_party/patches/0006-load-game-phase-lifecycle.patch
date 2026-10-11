@@ -1,0 +1,18 @@
+--- a/Source/gamemenu.cpp
++++ b/Source/gamemenu.cpp
+@@ -120,6 +120,7 @@
+ 	InitDiabloMsg(EMSG_LOADING);
+ 	drawpanflag = 255;
+ 	DrawAndBlit();
++	engine_phase("loading-start", WM_DIABLOADGAME);
+ 	LoadGame(FALSE);
+ 	ClrDiabloMsg();
+ 	PaletteFadeOut(8);
+@@ -129,6 +130,7 @@
+ 	PaletteFadeIn(8);
+ 	SetCursor_(CURSOR_HAND);
+   drawpanflag = 255;
++  engine_phase("game-ready", currlevel);
+ 	//SetWindowProc(saveProc);
+ }
+ 

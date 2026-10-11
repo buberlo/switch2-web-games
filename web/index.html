@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#131110">
+  <title>Switch Arcade · Local game room</title>
+  <link rel="stylesheet" href="/assets/portal.css">
+  <script src="/js/common.js" defer></script>
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="/portal" aria-label="Switch Arcade home"><span class="brand-mark" aria-hidden="true">◆</span><span>SWITCH <strong>ARCADE</strong></span></a>
+      <span class="local-label"><span class="live-dot" aria-hidden="true"></span> YOUR LOCAL GAME ROOM</span>
+    </header>
+    <main>
+      <section class="welcome" aria-labelledby="welcome-title">
+        <p class="eyebrow">THE CLASSICS, WITHIN REACH</p>
+        <h1 id="welcome-title">Press play.<br><span>Step into another world.</span></h1>
+        <p class="welcome-copy">A game served from your Mac, straight to this browser.<br> Start with a return to Tristram.</p>
+      </section>
+      <section class="game-section" aria-labelledby="game-section-title">
+        <div class="section-heading"><h2 id="game-section-title">Your games</h2><span>01 / FIRST ARRIVAL</span></div>
+        <article class="game-card" id="diablo">
+          <a class="game-art-link" href="/play/diablo" aria-label="Play Diablo shareware"><img class="game-art" src="/assets/diablo-icon.svg" width="560" height="420" alt="An original illustration of a candlelit cathedral doorway beneath a red moon"><span class="art-caption">BENEATH TRISTRAM</span></a>
+          <div class="game-information">
+            <div class="game-tags"><span>SHAREWARE</span><span>SINGLE PLAYER</span></div>
+            <h3>Diablo</h3>
+            <p class="game-description">Descend into the cathedral. Find better gear. Make it back alive.</p>
+            <div class="game-status"><span id="installation-status" class="status-pill status-pending">Checking your Mac…</span><p id="installation-detail">Loading the local game status.</p></div>
+            <a class="button button-primary play-button" href="/play/diablo"><span class="play-glyph" aria-hidden="true">▶</span> Play Diablo <span class="button-arrow" aria-hidden="true">↗</span></a>
+            <p class="play-note">Touch or browser cursor · Saves stay on your Mac</p>
+            <p class="play-note"><a href="/play/diablo?benchmark=1">Switch speed test</a> · Temporary character</p>
+          </div>
+        </article>
+      </section>
+      <aside class="verification-note"><span class="note-symbol" aria-hidden="true">◇</span><p><strong>First stop: a real Switch play session.</strong> Browser compatibility and controls are still being tested. More games will join the library after Diablo passes that check.</p><a href="/diagnostics">Browser check <span aria-hidden="true">→</span></a></aside>
+    </main>
+    <footer class="site-footer"><span>LOCAL HOST. OLD WORLDS. NEW ADVENTURES.</span><a href="/diagnostics">Diagnostics</a></footer>
+  </div>
+  <noscript><p class="noscript">JavaScript is needed to run the game and browser checks.</p></noscript>
+</body>
+</html>

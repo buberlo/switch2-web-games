@@ -1,0 +1,117 @@
+--- a/Source/sound.cpp
++++ b/Source/sound.cpp
+@@ -14,6 +14,10 @@
+ #ifdef EMSCRIPTEN
+ 
+ #include <emscripten.h>
++
++EM_JS(int, api_sound_enabled, (), {
++  return typeof self.DApi.sound_enabled === "function" ? (self.DApi.sound_enabled() ? 1 : 0) : 1;
++});
+ 
+ EM_JS(void, api_create_sound_float, (int id, const float* ptr, int samples, int channels, int rate), {
+   self.DApi.create_sound_raw(id, HEAPF32.slice(ptr / 4, ptr / 4 + samples * channels), samples, channels, rate);
+@@ -309,6 +313,10 @@
+ size_t get_wave_duration(const uint8_t* data, size_t size);
+ 
+ TSnd *sound_file_load(const char *path) {
++#ifdef EMSCRIPTEN
++  // A silent host should not decompress audio archives that it will discard.
++  if (!api_sound_enabled()) return NULL;
++#endif
+ #if 1//def EMSCRIPTEN
+   MemoryFile file = ((mpq::Archive*)diabdat_mpq)->load(path);
+   if (!file) {
+@@ -344,6 +352,9 @@
+ }
+ 
+ TSnd *sound_from_buffer(const uint8_t* buffer, unsigned long size, int channels, int depth, int rate) {
++#ifdef EMSCRIPTEN
++  if (!api_sound_enabled()) return NULL;
++#endif
+   int id = nextSoundId++;
+   int samples = size / (channels * depth / 8);
+   api_create_sound_raw(id, buffer, samples, channels, depth, rate);
+--- a/Source/ui/common.h
++++ b/Source/ui/common.h
+@@ -55,6 +55,7 @@
+ void LoadMaskedArtFont(const char *pszFile, Art *art, int frames, int mask = 250);
+ void LoadArtFont(const char *pszFile, int size, int color);
+ void engine_phase(const char* name, int value = 0);
++void engine_exit_reason(const char* reason);
+ void UiFadeReset();
+ void UiFadeIn(unsigned int time);
+ 
+--- a/Source/ui/common.cpp
++++ b/Source/ui/common.cpp
+@@ -12,10 +12,18 @@
+ 
+ #ifdef EMSCRIPTEN
+ #include <emscripten.h>
++EM_JS(void, api_engine_exit_reason, (const char* reason), {
++  if (self.DApi.phase) self.DApi.phase("exit-request", {reason:UTF8ToString(reason)});
++});
+ EM_JS(void, api_engine_phase, (const char* name, int value), {
+   if (self.DApi.phase) self.DApi.phase(UTF8ToString(name), {value:value});
+ });
+ #endif
++void engine_exit_reason(const char* reason) {
++#ifdef EMSCRIPTEN
++  api_engine_exit_reason(reason);
++#endif
++}
+ void engine_phase(const char* name, int value) {
+ #ifdef EMSCRIPTEN
+   api_engine_phase(name, value);
+--- a/Source/ui/main_menu.cpp
++++ b/Source/ui/main_menu.cpp
+@@ -50,6 +50,7 @@
+   void onKey(const KeyEvent& e) override {
+     DialogState::onKey(e);
+     if (e.action == KeyEvent::Press && e.key == KeyCode::ESCAPE) {
++      engine_exit_reason("menu-escape");
+       GameState::activate(nullptr);
+     }
+   }
+@@ -79,6 +80,7 @@
+       GameState::activate(get_credits_dialog());
+       break;
+     case MM_EXITDIABLO:
++      engine_exit_reason("menu-exit");
+       UiPlaySelectSound();
+       GameState::activate(nullptr);
+       break;
+--- a/Source/gamemenu.cpp
++++ b/Source/gamemenu.cpp
+@@ -1,4 +1,5 @@
+ #include "diablo.h"
++#include "ui/common.h"
+ 
+ TMenuItem sgSingleMenu[6] = {
+ 	// clang-format off
+@@ -106,6 +107,7 @@
+ 
+ void gamemenu_quit_game(BOOL bActivate)
+ {
++  engine_exit_reason("game-quit");
+ 	gamemenu_new_game(bActivate);
+ 	gbRunGameResult = FALSE;
+ }
+--- a/Source/ui/play.cpp
++++ b/Source/ui/play.cpp
+@@ -100,6 +100,7 @@
+ 
+   void onRender(unsigned int time) override {
+     for (int msg : messages) {
++      engine_phase("loading-start", msg);
+       if (gbMaxPlayers > 1) {
+         pfile_write_hero();
+       }
+@@ -119,6 +120,7 @@
+       //nthread_ignore_mutex(FALSE);
+       gbGameLoopStartup = TRUE;
+       drawpanflag = 255;
++      engine_phase("game-ready", currlevel);
+     }
+     messages.clear();
+ 
